@@ -1,14 +1,15 @@
 import { ConsultationRecord } from '@/types';
-import { Calendar, FileText, Pill, Eye, Edit } from 'lucide-react';
+import { Calendar, FileText, Pill, Eye, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface RecordCardProps {
   record: ConsultationRecord;
   onView?: (record: ConsultationRecord) => void;
   onEdit?: (record: ConsultationRecord) => void;
+  onDelete?: (record: ConsultationRecord) => void;
 }
 
-export function RecordCard({ record, onView, onEdit }: RecordCardProps) {
+export function RecordCard({ record, onView, onEdit, onDelete }: RecordCardProps) {
   return (
     <div className="card-elevated p-6 animate-slide-up">
       <div className="flex items-start justify-between mb-4">
@@ -46,6 +47,14 @@ export function RecordCard({ record, onView, onEdit }: RecordCardProps) {
           >
             <Edit className="h-4 w-4" />
           </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="h-8 w-8 text-muted-foreground hover:text-destructive"
+            onClick={() => onDelete?.(record)}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </div>
 
@@ -55,7 +64,7 @@ export function RecordCard({ record, onView, onEdit }: RecordCardProps) {
             <FileText className="h-4 w-4 text-primary" />
             Diagnóstico
           </div>
-          <p className="text-sm text-muted-foreground pl-6">{record.diagnosis}</p>
+          <p className="text-sm text-muted-foreground pl-6 line-clamp-2">{record.diagnosis}</p>
         </div>
       )}
 
@@ -65,13 +74,13 @@ export function RecordCard({ record, onView, onEdit }: RecordCardProps) {
             <Pill className="h-4 w-4 text-accent" />
             Tratamento
           </div>
-          <p className="text-sm text-muted-foreground pl-6">{record.treatment}</p>
+          <p className="text-sm text-muted-foreground pl-6 line-clamp-2">{record.treatment}</p>
         </div>
       )}
 
       {record.observations && (
         <div className="mt-4 pt-4 border-t border-border">
-          <p className="text-sm text-muted-foreground">{record.observations}</p>
+          <p className="text-sm text-muted-foreground line-clamp-2">{record.observations}</p>
         </div>
       )}
     </div>

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { ConsultationRecord } from '@/types';
+import { useState, useEffect } from 'react';
+import { ConsultationRecord, Patient } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,30 +19,44 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { mockPatients } from '@/data/mockData';
 
 interface RecordFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   record?: ConsultationRecord | null;
   onSave: (record: Partial<ConsultationRecord>) => void;
+  patients: Patient[];
 }
 
-export function RecordFormDialog({ open, onOpenChange, record, onSave }: RecordFormDialogProps) {
-  const [formData, setFormData] = useState<Partial<ConsultationRecord>>(
-    record || {
-      patientId: '',
-      patientName: '',
-      date: new Date().toISOString().split('T')[0],
-      diagnosis: '',
-      treatment: '',
-      observations: '',
-      prescriptions: '',
+export function RecordFormDialog({ open, onOpenChange, record, onSave, patients }: RecordFormDialogProps) {
+  const [formData, setFormData] = useState<Partial<ConsultationRecord>>({
+    patientId: '',
+    patientName: '',
+    date: new Date().toISOString().split('T')[0],
+    diagnosis: '',
+    treatment: '',
+    observations: '',
+    prescriptions: '',
+  });
+
+  useEffect(() => {
+    if (record) {
+      setFormData(record);
+    } else {
+      setFormData({
+        patientId: '',
+        patientName: '',
+        date: new Date().toISOString().split('T')[0],
+        diagnosis: '',
+        treatment: '',
+        observations: '',
+        prescriptions: '',
+      });
     }
-  );
+  }, [record, open]);
 
   const handlePatientChange = (patientId: string) => {
-    const patient = mockPatients.find(p => p.id === patientId);
+    const patient = patients.find(p => p.id === patientId);
     setFormData({
       ...formData,
       patientId,
@@ -80,7 +94,7 @@ export function RecordFormDialog({ open, onOpenChange, record, onSave }: RecordF
                   <SelectValue placeholder="Selecione um paciente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockPatients.map((patient) => (
+                  {patients.map((patient) => (
                     <SelectItem key={patient.id} value={patient.id}>
                       {patient.name}
                     </SelectItem>

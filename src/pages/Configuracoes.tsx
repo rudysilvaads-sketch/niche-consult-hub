@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { CATEGORY_LABELS, ProfessionalCategory } from '@/types';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const tabs = [
   { id: 'profile', label: 'Perfil', icon: User },
@@ -27,6 +28,44 @@ const tabs = [
 const Configuracoes = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [category, setCategory] = useState<ProfessionalCategory>('terapeuta');
+  const [profileData, setProfileData] = useState({
+    name: 'Dr. Rafael Mendes',
+    email: 'rafael@consultorio.com',
+    phone: '(11) 99999-8888',
+    crp: 'CRP 06/12345',
+    specialty: 'Terapia Cognitivo-Comportamental',
+  });
+  const [clinicData, setClinicData] = useState({
+    clinicName: 'Espaço Bem-Estar',
+    address: 'Rua das Flores, 123 - Sala 401',
+    city: 'São Paulo',
+    state: 'SP',
+    duration: '60',
+    interval: '15',
+  });
+  const [notifications, setNotifications] = useState({
+    emailReminders: true,
+    smsReminders: false,
+    newPatient: true,
+    cancelation: true,
+    dailySummary: true,
+  });
+
+  const handleSaveProfile = () => {
+    toast.success('Perfil atualizado com sucesso!');
+  };
+
+  const handleSaveClinic = () => {
+    toast.success('Dados do consultório atualizados!');
+  };
+
+  const handleSaveNotifications = () => {
+    toast.success('Preferências de notificação salvas!');
+  };
+
+  const handleChangePassword = () => {
+    toast.success('Senha alterada com sucesso!');
+  };
 
   return (
     <MainLayout>
@@ -85,18 +124,34 @@ const Configuracoes = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="name">Nome Completo</Label>
-                  <Input id="name" defaultValue="Dr. Rafael Mendes" className="input-styled mt-1" />
+                  <Input 
+                    id="name" 
+                    value={profileData.name}
+                    onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="email">E-mail</Label>
-                  <Input id="email" type="email" defaultValue="rafael@consultorio.com" className="input-styled mt-1" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    value={profileData.email}
+                    onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="phone">Telefone</Label>
-                  <Input id="phone" defaultValue="(11) 99999-8888" className="input-styled mt-1" />
+                  <Input 
+                    id="phone" 
+                    value={profileData.phone}
+                    onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="category">Categoria Profissional</Label>
+                  <Label>Categoria Profissional</Label>
                   <Select value={category} onValueChange={(v) => setCategory(v as ProfessionalCategory)}>
                     <SelectTrigger className="input-styled mt-1">
                       <SelectValue />
@@ -112,16 +167,28 @@ const Configuracoes = () => {
                 </div>
                 <div>
                   <Label htmlFor="crp">Registro Profissional (CRP/CRM/OAB)</Label>
-                  <Input id="crp" defaultValue="CRP 06/12345" className="input-styled mt-1" />
+                  <Input 
+                    id="crp" 
+                    value={profileData.crp}
+                    onChange={(e) => setProfileData({ ...profileData, crp: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="specialty">Especialidade</Label>
-                  <Input id="specialty" defaultValue="Terapia Cognitivo-Comportamental" className="input-styled mt-1" />
+                  <Input 
+                    id="specialty" 
+                    value={profileData.specialty}
+                    onChange={(e) => setProfileData({ ...profileData, specialty: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
               </div>
 
               <div className="pt-4 border-t border-border">
-                <Button className="btn-gradient">Salvar Alterações</Button>
+                <Button className="btn-gradient" onClick={handleSaveProfile}>
+                  Salvar Alterações
+                </Button>
               </div>
             </div>
           )}
@@ -140,23 +207,46 @@ const Configuracoes = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <Label htmlFor="clinicName">Nome do Consultório</Label>
-                  <Input id="clinicName" defaultValue="Espaço Bem-Estar" className="input-styled mt-1" />
+                  <Input 
+                    id="clinicName" 
+                    value={clinicData.clinicName}
+                    onChange={(e) => setClinicData({ ...clinicData, clinicName: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
                 <div className="col-span-2">
                   <Label htmlFor="address">Endereço</Label>
-                  <Input id="address" defaultValue="Rua das Flores, 123 - Sala 401" className="input-styled mt-1" />
+                  <Input 
+                    id="address" 
+                    value={clinicData.address}
+                    onChange={(e) => setClinicData({ ...clinicData, address: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="city">Cidade</Label>
-                  <Input id="city" defaultValue="São Paulo" className="input-styled mt-1" />
+                  <Input 
+                    id="city" 
+                    value={clinicData.city}
+                    onChange={(e) => setClinicData({ ...clinicData, city: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
                 <div>
                   <Label htmlFor="state">Estado</Label>
-                  <Input id="state" defaultValue="SP" className="input-styled mt-1" />
+                  <Input 
+                    id="state" 
+                    value={clinicData.state}
+                    onChange={(e) => setClinicData({ ...clinicData, state: e.target.value })}
+                    className="input-styled mt-1" 
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="duration">Duração Padrão da Consulta</Label>
-                  <Select defaultValue="60">
+                  <Label>Duração Padrão da Consulta</Label>
+                  <Select 
+                    value={clinicData.duration}
+                    onValueChange={(v) => setClinicData({ ...clinicData, duration: v })}
+                  >
                     <SelectTrigger className="input-styled mt-1">
                       <SelectValue />
                     </SelectTrigger>
@@ -169,8 +259,11 @@ const Configuracoes = () => {
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="interval">Intervalo entre Consultas</Label>
-                  <Select defaultValue="15">
+                  <Label>Intervalo entre Consultas</Label>
+                  <Select 
+                    value={clinicData.interval}
+                    onValueChange={(v) => setClinicData({ ...clinicData, interval: v })}
+                  >
                     <SelectTrigger className="input-styled mt-1">
                       <SelectValue />
                     </SelectTrigger>
@@ -184,7 +277,9 @@ const Configuracoes = () => {
               </div>
 
               <div className="pt-4 border-t border-border">
-                <Button className="btn-gradient">Salvar Alterações</Button>
+                <Button className="btn-gradient" onClick={handleSaveClinic}>
+                  Salvar Alterações
+                </Button>
               </div>
             </div>
           )}
@@ -201,25 +296,62 @@ const Configuracoes = () => {
               </div>
 
               <div className="space-y-4">
-                {[
-                  { id: 'emailReminders', label: 'Lembretes por e-mail', description: 'Receba lembretes de consultas por e-mail' },
-                  { id: 'smsReminders', label: 'Lembretes por SMS', description: 'Receba lembretes de consultas via SMS' },
-                  { id: 'newPatient', label: 'Novo paciente', description: 'Notificação quando um novo paciente é cadastrado' },
-                  { id: 'cancelation', label: 'Cancelamentos', description: 'Alerta quando uma consulta é cancelada' },
-                  { id: 'dailySummary', label: 'Resumo diário', description: 'Receba um resumo das consultas do dia' },
-                ].map((item) => (
-                  <div key={item.id} className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
-                    <div>
-                      <p className="font-medium text-foreground">{item.label}</p>
-                      <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-                    <Switch defaultChecked />
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+                  <div>
+                    <p className="font-medium text-foreground">Lembretes por e-mail</p>
+                    <p className="text-sm text-muted-foreground">Receba lembretes de consultas por e-mail</p>
                   </div>
-                ))}
+                  <Switch 
+                    checked={notifications.emailReminders}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, emailReminders: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+                  <div>
+                    <p className="font-medium text-foreground">Lembretes por SMS</p>
+                    <p className="text-sm text-muted-foreground">Receba lembretes de consultas via SMS</p>
+                  </div>
+                  <Switch 
+                    checked={notifications.smsReminders}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, smsReminders: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+                  <div>
+                    <p className="font-medium text-foreground">Novo paciente</p>
+                    <p className="text-sm text-muted-foreground">Notificação quando um novo paciente é cadastrado</p>
+                  </div>
+                  <Switch 
+                    checked={notifications.newPatient}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, newPatient: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+                  <div>
+                    <p className="font-medium text-foreground">Cancelamentos</p>
+                    <p className="text-sm text-muted-foreground">Alerta quando uma consulta é cancelada</p>
+                  </div>
+                  <Switch 
+                    checked={notifications.cancelation}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, cancelation: checked })}
+                  />
+                </div>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+                  <div>
+                    <p className="font-medium text-foreground">Resumo diário</p>
+                    <p className="text-sm text-muted-foreground">Receba um resumo das consultas do dia</p>
+                  </div>
+                  <Switch 
+                    checked={notifications.dailySummary}
+                    onCheckedChange={(checked) => setNotifications({ ...notifications, dailySummary: checked })}
+                  />
+                </div>
               </div>
 
               <div className="pt-4 border-t border-border">
-                <Button className="btn-gradient">Salvar Preferências</Button>
+                <Button className="btn-gradient" onClick={handleSaveNotifications}>
+                  Salvar Preferências
+                </Button>
               </div>
             </div>
           )}
@@ -251,7 +383,9 @@ const Configuracoes = () => {
               </div>
 
               <div className="pt-4 border-t border-border">
-                <Button className="btn-gradient">Alterar Senha</Button>
+                <Button className="btn-gradient" onClick={handleChangePassword}>
+                  Alterar Senha
+                </Button>
               </div>
             </div>
           )}

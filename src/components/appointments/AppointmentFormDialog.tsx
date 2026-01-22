@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Appointment, AppointmentStatus } from '@/types';
+import { useState, useEffect } from 'react';
+import { Appointment, AppointmentStatus, Patient } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,13 +19,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { mockPatients } from '@/data/mockData';
 
 interface AppointmentFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   appointment?: Appointment | null;
   onSave: (appointment: Partial<Appointment>) => void;
+  patients: Patient[];
+  defaultDate?: string;
 }
 
 const appointmentTypes = [
@@ -38,22 +39,44 @@ const appointmentTypes = [
   'Emergência',
 ];
 
-export function AppointmentFormDialog({ open, onOpenChange, appointment, onSave }: AppointmentFormDialogProps) {
-  const [formData, setFormData] = useState<Partial<Appointment>>(
-    appointment || {
-      patientId: '',
-      patientName: '',
-      date: '',
-      time: '',
-      duration: 60,
-      status: 'agendado' as AppointmentStatus,
-      type: '',
-      notes: '',
+export function AppointmentFormDialog({ 
+  open, 
+  onOpenChange, 
+  appointment, 
+  onSave, 
+  patients,
+  defaultDate,
+}: AppointmentFormDialogProps) {
+  const [formData, setFormData] = useState<Partial<Appointment>>({
+    patientId: '',
+    patientName: '',
+    date: defaultDate || '',
+    time: '',
+    duration: 60,
+    status: 'agendado' as AppointmentStatus,
+    type: '',
+    notes: '',
+  });
+
+  useEffect(() => {
+    if (appointment) {
+      setFormData(appointment);
+    } else {
+      setFormData({
+        patientId: '',
+        patientName: '',
+        date: defaultDate || '',
+        time: '',
+        duration: 60,
+        status: 'agendado' as AppointmentStatus,
+        type: '',
+        notes: '',
+      });
     }
-  );
+  }, [appointment, defaultDate, open]);
 
   const handlePatientChange = (patientId: string) => {
-    const patient = mockPatients.find(p => p.id === patientId);
+    const patient = patients.find(p => p.id === patientId);
     setFormData({
       ...formData,
       patientId,
@@ -91,7 +114,7 @@ export function AppointmentFormDialog({ open, onOpenChange, appointment, onSave 
                   <SelectValue placeholder="Selecione um paciente" />
                 </SelectTrigger>
                 <SelectContent>
-                  {mockPatients.map((patient) => (
+                  {patients.map((patient) => (
                     <SelectItem key={patient.id} value={patient.id}>
                       {patient.name}
                     </SelectItem>
