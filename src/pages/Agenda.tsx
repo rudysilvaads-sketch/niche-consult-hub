@@ -7,23 +7,49 @@ import { Header } from '@/components/layout/Header';
 import { AppointmentList } from '@/components/dashboard/AppointmentList';
 import { AppointmentFormDialog } from '@/components/appointments/AppointmentFormDialog';
 import { Button } from '@/components/ui/button';
-import { mockAppointments } from '@/data/mockData';
+import { useApp } from '@/contexts/AppContext';
 import { Appointment } from '@/types';
 import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
 
 const Agenda = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+
+  const { patients, appointments, addAppointment, updateAppointment, deleteAppointment } = useApp();
 
   const weekStart = startOfWeek(selectedDate, { weekStartsOn: 1 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
 
-  const filteredAppointments = mockAppointments.filter(
+  const filteredAppointments = appointments.filter(
     (apt) => apt.date === format(selectedDate, 'yyyy-MM-dd')
   );
 
   const handleSaveAppointment = (appointment: Partial<Appointment>) => {
-    console.log('Consulta salva:', appointment);
+    if (selectedAppointment) {
+      updateAppointment(selectedAppointment.id, appointment);
+      toast.success('Consulta atualizada com sucesso!');
+    } else {
+      addAppointment(appointment);
+      toast.success('Consulta agendada com sucesso!');
+    }
+    setSelectedAppointment(null);
+  };
+
+  const handleEditAppointment = (appointment: Appointment) => {
+    setSelectedAppointment(appointment);
+    setAppointmentDialogOpen(true);
+  };
+
+  const handleUpdateStatus = (id: string, status: Appointment['status']) => {
+    updateAppointment(id, { status });
+    toast.success('Status atualizado!');
+  };
+
+  const handleDeleteAppointment = (id: string) => {
+    deleteAppointment(id);
+    toast.success('Consulta cancelada!');
   };
 
   const navigateWeek = (direction: 'prev' | 'next') => {
@@ -31,12 +57,17 @@ const Agenda = () => {
     setSelectedDate(addDays(selectedDate, days));
   };
 
+  const handleNewAppointment = () => {
+    setSelectedAppointment(null);
+    setAppointmentDialogOpen(true);
+  };
+
   return (
     <MainLayout>
       <Header 
         title="Agenda" 
         subtitle="Gerencie suas consultas e horários"
-        onNewAppointment={() => setAppointmentDialogOpen(true)}
+        onNewAppointment={handleNewAppointment}
       />
 
       {/* Week Navigation */}
@@ -60,7 +91,7 @@ const Agenda = () => {
           {weekDays.map((day) => {
             const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
             const isToday = format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
-            const dayAppointments = mockAppointments.filter(
+            const dayAppointments = appointments.filter(
               (apt) => apt.date === format(day, 'yyyy-MM-dd')
             );
 
@@ -110,6 +141,9 @@ const Agenda = () => {
           <AppointmentList
             appointments={filteredAppointments}
             title={`Consultas - ${format(selectedDate, "d 'de' MMMM", { locale: ptBR })}`}
+            onEdit={handleEditAppointment}
+            onUpdateStatus={handleUpdateStatus}
+            onDelete={handleDeleteAppointment}
           />
         </div>
 
@@ -142,7 +176,7 @@ const Agenda = () => {
 
           <Button 
             className="w-full mt-6 btn-gradient"
-            onClick={() => setAppointmentDialogOpen(true)}
+            onClick={handleNewAppointment}
           >
             <Plus className="h-4 w-4 mr-2" />
             Nova Consulta
@@ -152,8 +186,14 @@ const Agenda = () => {
 
       <AppointmentFormDialog
         open={appointmentDialogOpen}
-        onOpenChange={setAppointmentDialogOpen}
+        onOpenChange={(open) => {
+          setAppointmentDialogOpen(open);
+          if (!open) setSelectedAppointment(null);
+        }}
+        appointment={selectedAppointment}
         onSave={handleSaveAppointment}
+        patients={patients}
+        defaultDate={format(selectedDate, 'yyyy-MM-dd')}
       />
     </MainLayout>
   );

@@ -4,17 +4,33 @@ import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { PatientTable } from '@/components/patients/PatientTable';
 import { PatientFormDialog } from '@/components/patients/PatientFormDialog';
+import { PatientViewDialog } from '@/components/patients/PatientViewDialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { mockPatients } from '@/data/mockData';
+import { useApp } from '@/contexts/AppContext';
 import { Patient } from '@/types';
+import { toast } from 'sonner';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 const Pacientes = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [patientDialogOpen, setPatientDialogOpen] = useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
 
-  const filteredPatients = mockPatients.filter((patient) =>
+  const { patients, addPatient, updatePatient, deletePatient } = useApp();
+
+  const filteredPatients = patients.filter((patient) =>
     patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
     patient.cpf.includes(searchTerm)
@@ -30,9 +46,40 @@ const Pacientes = () => {
     setPatientDialogOpen(true);
   };
 
-  const handleSavePatient = (patient: Partial<Patient>) => {
-    console.log('Paciente salvo:', patient);
+  const handleViewPatient = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setViewDialogOpen(true);
   };
+
+  const handleDeleteClick = (patient: Patient) => {
+    setSelectedPatient(patient);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (selectedPatient) {
+      deletePatient(selectedPatient.id);
+      toast.success('Paciente excluído com sucesso!');
+      setDeleteDialogOpen(false);
+      setSelectedPatient(null);
+    }
+  };
+
+  const handleSavePatient = (patient: Partial<Patient>) => {
+    if (selectedPatient) {
+      updatePatient(selectedPatient.id, patient);
+      toast.success('Paciente atualizado com sucesso!');
+    } else {
+      addPatient(patient);
+      toast.success('Paciente cadastrado com sucesso!');
+    }
+  };
+
+  const newThisMonth = patients.filter((p) => {
+    const created = new Date(p.createdAt);
+    const now = new Date();
+    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+  }).length;
 
   return (
     <MainLayout>
@@ -69,15 +116,15 @@ const Pacientes = () => {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="card-elevated p-4">
           <p className="text-sm text-muted-foreground">Total de Pacientes</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{mockPatients.length}</p>
+          <p className="text-2xl font-bold text-foreground mt-1">{patients.length}</p>
         </div>
         <div className="card-elevated p-4">
           <p className="text-sm text-muted-foreground">Novos este mês</p>
-          <p className="text-2xl font-bold text-success mt-1">+3</p>
+          <p className="text-2xl font-bold text-success mt-1">+{newThisMonth}</p>
         </div>
         <div className="card-elevated p-4">
           <p className="text-sm text-muted-foreground">Ativos</p>
-          <p className="text-2xl font-bold text-primary mt-1">{mockPatients.length}</p>
+          <p className="text-2xl font-bold text-primary mt-1">{patients.length}</p>
         </div>
       </div>
 
@@ -85,8 +132,8 @@ const Pacientes = () => {
       <PatientTable
         patients={filteredPatients}
         onEdit={handleEditPatient}
-        onView={(patient) => console.log('Ver paciente:', patient)}
-        onDelete={(patient) => console.log('Excluir paciente:', patient)}
+        onView={handleViewPatient}
+        onDelete={handleDeleteClick}
       />
 
       {/* Patient Dialog */}
@@ -96,6 +143,32 @@ const Pacientes = () => {
         patient={selectedPatient}
         onSave={handleSavePatient}
       />
+
+      {/* View Dialog */}
+      <PatientViewDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        patient={selectedPatient}
+      />
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir o paciente "{selectedPatient?.name}"? 
+              Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </MainLayout>
   );
 };

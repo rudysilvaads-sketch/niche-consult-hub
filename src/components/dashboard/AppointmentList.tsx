@@ -6,6 +6,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
@@ -13,6 +14,9 @@ interface AppointmentListProps {
   appointments: Appointment[];
   title?: string;
   showDate?: boolean;
+  onEdit?: (appointment: Appointment) => void;
+  onUpdateStatus?: (id: string, status: AppointmentStatus) => void;
+  onDelete?: (id: string) => void;
 }
 
 const statusColors: Record<AppointmentStatus, string> = {
@@ -23,7 +27,14 @@ const statusColors: Record<AppointmentStatus, string> = {
   cancelado: 'bg-destructive/10 text-destructive border-destructive/20',
 };
 
-export function AppointmentList({ appointments, title, showDate = false }: AppointmentListProps) {
+export function AppointmentList({ 
+  appointments, 
+  title, 
+  showDate = false,
+  onEdit,
+  onUpdateStatus,
+  onDelete,
+}: AppointmentListProps) {
   return (
     <div className="card-elevated p-6">
       {title && (
@@ -82,12 +93,34 @@ export function AppointmentList({ appointments, title, showDate = false }: Appoi
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Ver detalhes</DropdownMenuItem>
-                    <DropdownMenuItem>Editar</DropdownMenuItem>
-                    <DropdownMenuItem>Iniciar atendimento</DropdownMenuItem>
-                    <DropdownMenuItem className="text-destructive">
-                      Cancelar
-                    </DropdownMenuItem>
+                    {onEdit && (
+                      <DropdownMenuItem onClick={() => onEdit(appointment)}>
+                        Editar
+                      </DropdownMenuItem>
+                    )}
+                    {onUpdateStatus && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => onUpdateStatus(appointment.id, 'confirmado')}>
+                          Confirmar
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onUpdateStatus(appointment.id, 'em_andamento')}>
+                          Iniciar atendimento
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onUpdateStatus(appointment.id, 'concluido')}>
+                          Marcar como concluído
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
+                    {onDelete && (
+                      <DropdownMenuItem 
+                        onClick={() => onDelete(appointment.id)}
+                        className="text-destructive focus:text-destructive"
+                      >
+                        Cancelar consulta
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Patient } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,17 +21,31 @@ interface PatientFormDialogProps {
 }
 
 export function PatientFormDialog({ open, onOpenChange, patient, onSave }: PatientFormDialogProps) {
-  const [formData, setFormData] = useState<Partial<Patient>>(
-    patient || {
-      name: '',
-      email: '',
-      phone: '',
-      birthDate: '',
-      cpf: '',
-      address: '',
-      notes: '',
+  const [formData, setFormData] = useState<Partial<Patient>>({
+    name: '',
+    email: '',
+    phone: '',
+    birthDate: '',
+    cpf: '',
+    address: '',
+    notes: '',
+  });
+
+  useEffect(() => {
+    if (patient) {
+      setFormData(patient);
+    } else {
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        birthDate: '',
+        cpf: '',
+        address: '',
+        notes: '',
+      });
     }
-  );
+  }, [patient, open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

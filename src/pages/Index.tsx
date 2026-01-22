@@ -7,19 +7,26 @@ import { AppointmentList } from '@/components/dashboard/AppointmentList';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { RecentPatients } from '@/components/dashboard/RecentPatients';
 import { AppointmentFormDialog } from '@/components/appointments/AppointmentFormDialog';
-import { mockAppointments, mockPatients, mockStats } from '@/data/mockData';
+import { useApp } from '@/contexts/AppContext';
 import { Appointment } from '@/types';
+import { toast } from 'sonner';
 
 const Index = () => {
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
+  const { patients, appointments, stats, addAppointment, updateAppointment } = useApp();
 
-  const todayAppointments = mockAppointments.filter(
+  const todayAppointments = appointments.filter(
     (apt) => apt.status !== 'concluido' && apt.status !== 'cancelado'
   ).slice(0, 4);
 
   const handleSaveAppointment = (appointment: Partial<Appointment>) => {
-    console.log('Nova consulta:', appointment);
-    // Here you would save to backend
+    addAppointment(appointment);
+    toast.success('Consulta agendada com sucesso!');
+  };
+
+  const handleUpdateStatus = (id: string, status: Appointment['status']) => {
+    updateAppointment(id, { status });
+    toast.success('Status atualizado!');
   };
 
   return (
@@ -34,20 +41,20 @@ const Index = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <StatCard
           title="Total de Pacientes"
-          value={mockStats.totalPatients}
-          change="+3 este mês"
+          value={stats.totalPatients}
+          change={`+${Math.max(0, stats.totalPatients - 2)} este mês`}
           changeType="positive"
           icon={Users}
         />
         <StatCard
           title="Consultas Hoje"
-          value={mockStats.todayAppointments}
+          value={stats.todayAppointments}
           icon={Calendar}
           iconColor="text-accent"
         />
         <StatCard
           title="Concluídas (Mês)"
-          value={mockStats.completedThisMonth}
+          value={stats.completedThisMonth}
           change="+12% vs último mês"
           changeType="positive"
           icon={CheckCircle}
@@ -55,7 +62,7 @@ const Index = () => {
         />
         <StatCard
           title="Próxima Semana"
-          value={mockStats.weekAppointments}
+          value={stats.weekAppointments}
           icon={Clock}
           iconColor="text-warning"
         />
@@ -68,13 +75,14 @@ const Index = () => {
           <AppointmentList 
             appointments={todayAppointments} 
             title="Consultas de Hoje"
+            onUpdateStatus={handleUpdateStatus}
           />
         </div>
 
         {/* Sidebar Content */}
         <div className="space-y-6">
-          <QuickActions />
-          <RecentPatients patients={mockPatients} />
+          <QuickActions onNewAppointment={() => setAppointmentDialogOpen(true)} />
+          <RecentPatients patients={patients} />
         </div>
       </div>
 
@@ -83,6 +91,7 @@ const Index = () => {
         open={appointmentDialogOpen}
         onOpenChange={setAppointmentDialogOpen}
         onSave={handleSaveAppointment}
+        patients={patients}
       />
     </MainLayout>
   );
