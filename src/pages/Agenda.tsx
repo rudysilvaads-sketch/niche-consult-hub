@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { format, addDays, startOfWeek } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Link2, Video } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { AppointmentList } from '@/components/dashboard/AppointmentList';
 import { AppointmentFormDialog } from '@/components/appointments/AppointmentFormDialog';
+import { RegistrationLinkManager } from '@/components/telehealth/RegistrationLinkManager';
+import { StartSessionDialog } from '@/components/telehealth/StartSessionDialog';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
 import { Appointment } from '@/types';
@@ -16,6 +18,9 @@ const Agenda = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [appointmentDialogOpen, setAppointmentDialogOpen] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
+  const [linkManagerOpen, setLinkManagerOpen] = useState(false);
+  const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
+  const [sessionAppointment, setSessionAppointment] = useState<Appointment | null>(null);
 
   const { patients, appointments, addAppointment, updateAppointment, deleteAppointment } = useApp();
 
@@ -62,13 +67,24 @@ const Agenda = () => {
     setAppointmentDialogOpen(true);
   };
 
+  const handleStartSession = (appointment: Appointment) => {
+    setSessionAppointment(appointment);
+    setSessionDialogOpen(true);
+  };
+
   return (
     <MainLayout>
-      <Header 
-        title="Agenda" 
-        subtitle="Gerencie suas consultas e horários"
-        onNewAppointment={handleNewAppointment}
-      />
+      <div className="flex items-center justify-between mb-6">
+        <Header 
+          title="Agenda" 
+          subtitle="Gerencie suas consultas e horários"
+          onNewAppointment={handleNewAppointment}
+        />
+        <Button variant="outline" onClick={() => setLinkManagerOpen(true)} className="gap-2">
+          <Link2 className="h-4 w-4" />
+          Links de Cadastro
+        </Button>
+      </div>
 
       {/* Week Navigation */}
       <div className="card-elevated p-4 mb-6">
@@ -144,6 +160,7 @@ const Agenda = () => {
             onEdit={handleEditAppointment}
             onUpdateStatus={handleUpdateStatus}
             onDelete={handleDeleteAppointment}
+            onStartSession={handleStartSession}
           />
         </div>
 
@@ -194,6 +211,17 @@ const Agenda = () => {
         onSave={handleSaveAppointment}
         patients={patients}
         defaultDate={format(selectedDate, 'yyyy-MM-dd')}
+      />
+
+      <RegistrationLinkManager
+        open={linkManagerOpen}
+        onOpenChange={setLinkManagerOpen}
+      />
+
+      <StartSessionDialog
+        open={sessionDialogOpen}
+        onOpenChange={setSessionDialogOpen}
+        appointment={sessionAppointment}
       />
     </MainLayout>
   );
