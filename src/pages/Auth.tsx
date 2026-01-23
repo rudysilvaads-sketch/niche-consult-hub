@@ -658,11 +658,11 @@ const Auth = () => {
           {/* Terms */}
           <p className="text-center text-xs text-muted-foreground mt-6">
             Ao continuar, você concorda com nossos{' '}
-            <Link to="/termos-de-uso" className="text-primary hover:underline">
+            <Link to="/termos" className="text-primary hover:underline">
               Termos de Uso
             </Link>{' '}
             e{' '}
-            <Link to="/politica-privacidade" className="text-primary hover:underline">
+            <Link to="/privacidade" className="text-primary hover:underline">
               Política de Privacidade
             </Link>
           </p>
