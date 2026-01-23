@@ -19,6 +19,7 @@ import Documentos from "./pages/Documentos";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
 import VideoRoom from "./pages/VideoRoom";
+import ResumoSessao from "./pages/ResumoSessao";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/agendar" element={<Agendar />} />
                 <Route path="/cadastro/:token" element={<Cadastro />} />
+                <Route path="/resumo/:token" element={<ResumoSessao />} />
                 <Route path="/sala/:sessionId" element={<VideoRoom />} />
                 
                 {/* Protected routes */}

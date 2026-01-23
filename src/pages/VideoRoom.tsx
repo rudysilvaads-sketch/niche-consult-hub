@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Video, VideoOff, Mic, MicOff, Phone, PhoneOff, 
   MessageSquare, FileText, Clock, User, AlertCircle,
-  Loader2, Brain, Download
+  Loader2, Brain, Download, Share2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +16,7 @@ import { useTranscription } from '@/hooks/useTranscription';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useAuth } from '@/contexts/AuthContext';
 import { TranscriptionSegment, AIAnalysis } from '@/types/telehealth';
+import { ShareAnalysisDialog } from '@/components/analysis/ShareAnalysisDialog';
 
 const VideoRoom = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -31,6 +32,7 @@ const VideoRoom = () => {
   const [elapsedTime, setElapsedTime] = useState('00:00:00');
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   const isTherapist = true; // In production, determine from user role
 
@@ -259,15 +261,27 @@ const VideoRoom = () => {
                 </div>
               )}
 
-              <div className="flex gap-3">
-                <Button onClick={() => navigate('/prontuarios')} className="btn-gradient">
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => setShowShareDialog(true)} className="btn-gradient">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Compartilhar com Paciente
+                </Button>
+                <Button onClick={() => navigate('/prontuarios')} variant="outline">
                   <FileText className="h-4 w-4 mr-2" />
                   Salvar no Prontuário
                 </Button>
-                <Button variant="outline" onClick={() => navigate('/agenda')}>
+                <Button variant="ghost" onClick={() => navigate('/agenda')}>
                   Voltar à Agenda
                 </Button>
               </div>
+
+              {/* Share Dialog */}
+              <ShareAnalysisDialog
+                open={showShareDialog}
+                onOpenChange={setShowShareDialog}
+                analysis={analysis}
+                patientName={session?.patientName || 'Paciente'}
+              />
             </CardContent>
           </Card>
         </div>
