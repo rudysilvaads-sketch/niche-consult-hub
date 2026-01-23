@@ -21,6 +21,7 @@ export function useAppData() {
       cpf: patient.cpf || '',
       address: patient.address,
       notes: patient.notes,
+      status: patient.status || 'ativo',
       createdAt: new Date().toISOString().split('T')[0],
     };
     setPatients((prev) => [...prev, newPatient]);
