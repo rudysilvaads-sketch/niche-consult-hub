@@ -10,7 +10,7 @@ import {
   onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+import { db, isFirebaseConfigured } from '@/lib/firebase';
 import {
   Patient,
   Appointment,
@@ -43,12 +43,7 @@ export function useAppData() {
   const [loading, setLoading] = useState(true);
   const [firebaseConnected, setFirebaseConnected] = useState(false);
 
-  // Check if Firebase is configured
-  const isFirebaseConfigured = !!(
-    import.meta.env.VITE_FIREBASE_API_KEY &&
-    import.meta.env.VITE_FIREBASE_PROJECT_ID &&
-    import.meta.env.VITE_FIREBASE_APP_ID
-  );
+  // Use imported isFirebaseConfigured from firebase.ts
 
   // Subscribe to Firestore collections
   useEffect(() => {
@@ -72,6 +67,10 @@ export function useAppData() {
       fallbackData: T[]
     ) => {
       try {
+        if (!db) {
+          setter(fallbackData);
+          return;
+        }
         const q = query(collection(db, collectionName), orderBy('createdAt', 'desc'));
         const unsubscribe = onSnapshot(
           q,
@@ -128,7 +127,7 @@ export function useAppData() {
       createdAt: new Date().toISOString().split('T')[0],
     };
 
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         const docRef = await addDoc(collection(db, 'patients'), newPatient);
         return { id: docRef.id, ...newPatient };
@@ -144,7 +143,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const updatePatient = useCallback(async (id: string, updates: Partial<Patient>) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await updateDoc(doc(db, 'patients', id), updates);
       } catch (error) {
@@ -157,7 +156,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const deletePatient = useCallback(async (id: string) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await deleteDoc(doc(db, 'patients', id));
       } catch (error) {
@@ -187,7 +186,7 @@ export function useAppData() {
       createdAt: new Date().toISOString().split('T')[0],
     };
 
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         const docRef = await addDoc(collection(db, 'appointments'), newAppointment);
         return { id: docRef.id, ...newAppointment };
@@ -203,7 +202,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const updateAppointment = useCallback(async (id: string, updates: Partial<Appointment>) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await updateDoc(doc(db, 'appointments', id), updates);
       } catch (error) {
@@ -216,7 +215,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const deleteAppointment = useCallback(async (id: string) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await deleteDoc(doc(db, 'appointments', id));
       } catch (error) {
@@ -242,7 +241,7 @@ export function useAppData() {
       createdAt: new Date().toISOString().split('T')[0],
     };
 
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         const docRef = await addDoc(collection(db, 'records'), newRecord);
         return { id: docRef.id, ...newRecord };
@@ -258,7 +257,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const updateRecord = useCallback(async (id: string, updates: Partial<ConsultationRecord>) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await updateDoc(doc(db, 'records', id), updates);
       } catch (error) {
@@ -271,7 +270,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const deleteRecord = useCallback(async (id: string) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await deleteDoc(doc(db, 'records', id));
       } catch (error) {
@@ -299,7 +298,7 @@ export function useAppData() {
       createdAt: new Date().toISOString(),
     };
 
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         const docRef = await addDoc(collection(db, 'transactions'), newTransaction);
         return { id: docRef.id, ...newTransaction };
@@ -315,7 +314,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const updateTransaction = useCallback(async (id: string, updates: Partial<Transaction>) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await updateDoc(doc(db, 'transactions', id), updates);
       } catch (error) {
@@ -328,7 +327,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const deleteTransaction = useCallback(async (id: string) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await deleteDoc(doc(db, 'transactions', id));
       } catch (error) {
@@ -352,7 +351,7 @@ export function useAppData() {
       createdAt: new Date().toISOString().split('T')[0],
     };
 
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         const docRef = await addDoc(collection(db, 'packages'), newPackage);
         return { id: docRef.id, ...newPackage };
@@ -368,7 +367,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const updatePackage = useCallback(async (id: string, updates: Partial<ServicePackage>) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await updateDoc(doc(db, 'packages', id), updates);
       } catch (error) {
@@ -381,7 +380,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const deletePackage = useCallback(async (id: string) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await deleteDoc(doc(db, 'packages', id));
       } catch (error) {
@@ -406,7 +405,7 @@ export function useAppData() {
       createdAt: new Date().toISOString().split('T')[0],
     };
 
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         const docRef = await addDoc(collection(db, 'documents'), newDocument);
         return { id: docRef.id, ...newDocument };
@@ -422,7 +421,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const updateDocument = useCallback(async (id: string, updates: Partial<Document>) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await updateDoc(doc(db, 'documents', id), updates);
       } catch (error) {
@@ -435,7 +434,7 @@ export function useAppData() {
   }, [isFirebaseConfigured]);
 
   const deleteDocument = useCallback(async (id: string) => {
-    if (isFirebaseConfigured) {
+    if (isFirebaseConfigured && db) {
       try {
         await deleteDoc(doc(db, 'documents', id));
       } catch (error) {
