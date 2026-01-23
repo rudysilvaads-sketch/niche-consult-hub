@@ -48,6 +48,7 @@ const Auth = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
+  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -56,6 +57,14 @@ const Auth = () => {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { clientX, clientY } = e;
+    const { innerWidth, innerHeight } = window;
+    const x = (clientX / innerWidth - 0.5) * 20;
+    const y = (clientY / innerHeight - 0.5) * 20;
+    setMousePosition({ x, y });
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,10 +161,15 @@ const Auth = () => {
   // Left Panel with Branding
   const BrandingPanel = () => (
     <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-      {/* Background Image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+      {/* Background Image with Parallax */}
+      <motion.div 
+        className="absolute inset-[-20px] bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${authBackground})` }}
+        animate={{
+          x: mousePosition.x,
+          y: mousePosition.y,
+        }}
+        transition={{ type: "spring", stiffness: 50, damping: 30 }}
       />
       
       {/* Overlay gradient */}
@@ -263,7 +277,7 @@ const Auth = () => {
   // Reset Password View
   if (showResetPassword) {
     return (
-      <div className="min-h-screen flex">
+      <div className="min-h-screen flex" onMouseMove={handleMouseMove}>
         <BrandingPanel />
         
         <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-background">
@@ -380,7 +394,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex" onMouseMove={handleMouseMove}>
       <BrandingPanel />
       
       <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-8 lg:p-12 bg-background">
