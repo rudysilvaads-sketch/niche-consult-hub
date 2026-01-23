@@ -89,8 +89,8 @@ const Pacientes = () => {
       />
 
       {/* Actions Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="relative w-full sm:w-96">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por nome, email ou CPF..."
@@ -100,31 +100,31 @@ const Pacientes = () => {
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
+        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
+          <Button variant="outline" className="gap-2 text-sm flex-1 sm:flex-none">
             <Filter className="h-4 w-4" />
-            Filtros
+            <span className="hidden xs:inline">Filtros</span>
           </Button>
-          <Button onClick={handleNewPatient} className="btn-gradient gap-2">
+          <Button onClick={handleNewPatient} className="btn-gradient gap-2 text-sm flex-1 sm:flex-none">
             <Plus className="h-4 w-4" />
-            Novo Paciente
+            <span>Novo Paciente</span>
           </Button>
         </div>
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="card-elevated p-4">
-          <p className="text-sm text-muted-foreground">Total de Pacientes</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{patients.length}</p>
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <div className="card-elevated p-3 sm:p-4">
+          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">Total</p>
+          <p className="text-lg sm:text-2xl font-bold text-foreground mt-0.5 sm:mt-1">{patients.length}</p>
         </div>
-        <div className="card-elevated p-4">
-          <p className="text-sm text-muted-foreground">Novos este mês</p>
-          <p className="text-2xl font-bold text-success mt-1">+{newThisMonth}</p>
+        <div className="card-elevated p-3 sm:p-4">
+          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">Novos</p>
+          <p className="text-lg sm:text-2xl font-bold text-success mt-0.5 sm:mt-1">+{newThisMonth}</p>
         </div>
-        <div className="card-elevated p-4">
-          <p className="text-sm text-muted-foreground">Ativos</p>
-          <p className="text-2xl font-bold text-primary mt-1">{patients.length}</p>
+        <div className="card-elevated p-3 sm:p-4">
+          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">Ativos</p>
+          <p className="text-lg sm:text-2xl font-bold text-primary mt-0.5 sm:mt-1">{patients.length}</p>
         </div>
       </div>
 

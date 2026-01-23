@@ -86,9 +86,9 @@ const Relatorios = () => {
       />
 
       {/* Period Filter */}
-      <div className="flex justify-end mb-6">
+      <div className="flex justify-end mb-4 sm:mb-6">
         <Select value={period} onValueChange={setPeriod}>
-          <SelectTrigger className="w-40 input-styled">
+          <SelectTrigger className="w-32 sm:w-40 input-styled text-sm">
             <SelectValue placeholder="Período" />
           </SelectTrigger>
           <SelectContent>
@@ -101,51 +101,51 @@ const Relatorios = () => {
       </div>
 
       {/* Quick Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div className="card-elevated p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Users className="h-5 w-5 text-primary" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="card-elevated p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Pacientes</p>
-              <p className="text-xl font-bold text-foreground">{patients.length}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="card-elevated p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center">
-              <Calendar className="h-5 w-5 text-accent" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Consultas</p>
-              <p className="text-xl font-bold text-foreground">{appointments.length}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Pacientes</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground">{patients.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="card-elevated p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-success/10 flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-success" />
+        <div className="card-elevated p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Faturamento</p>
-              <p className="text-xl font-bold text-foreground">{formatCurrency(stats.monthRevenue)}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Consultas</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground">{appointments.length}</p>
             </div>
           </div>
         </div>
 
-        <div className="card-elevated p-4">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-warning/10 flex items-center justify-center">
-              <Activity className="h-5 w-5 text-warning" />
+        <div className="card-elevated p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-success/10 flex items-center justify-center flex-shrink-0">
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
             </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Taxa Conclusão</p>
-              <p className="text-xl font-bold text-foreground">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Faturamento</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground truncate">{formatCurrency(stats.monthRevenue)}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card-elevated p-3 sm:p-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg bg-warning/10 flex items-center justify-center flex-shrink-0">
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Taxa Conclusão</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground">
                 {appointments.length > 0 
                   ? Math.round((stats.completedThisMonth / appointments.length) * 100)
                   : 0}%
@@ -156,27 +156,28 @@ const Relatorios = () => {
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {/* Revenue Chart */}
-        <div className="card-elevated p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="card-elevated p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h3 className="font-semibold text-foreground">Receitas vs Despesas</h3>
-              <p className="text-sm text-muted-foreground">Últimos 6 meses</p>
+              <h3 className="font-semibold text-foreground text-sm sm:text-base">Receitas vs Despesas</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Últimos 6 meses</p>
             </div>
-            <TrendingUp className="h-5 w-5 text-success" />
+            <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
           </div>
-          <div className="h-64">
+          <div className="h-48 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={revenueData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickFormatter={(v) => `R$${v/1000}k`} />
+                <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={10} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={10} tickFormatter={(v) => `${v/1000}k`} />
                 <Tooltip 
                   contentStyle={{ 
                     backgroundColor: 'hsl(var(--card))', 
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    fontSize: '12px'
                   }}
                   formatter={(value: number) => formatCurrency(value)}
                 />
@@ -202,26 +203,28 @@ const Relatorios = () => {
         </div>
 
         {/* Appointment Status */}
-        <div className="card-elevated p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="card-elevated p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h3 className="font-semibold text-foreground">Status das Consultas</h3>
-              <p className="text-sm text-muted-foreground">Distribuição atual</p>
+              <h3 className="font-semibold text-foreground text-sm sm:text-base">Status das Consultas</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Distribuição atual</p>
             </div>
-            <PieChart className="h-5 w-5 text-primary" />
+            <PieChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
-          <div className="h-64 flex items-center justify-center">
+          <div className="h-48 sm:h-64 flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
               <RechartsPie>
                 <Pie
                   data={statusData}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
+                  innerRadius={40}
+                  outerRadius={70}
                   paddingAngle={5}
                   dataKey="value"
                   label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
+                  fontSize={10}
                 >
                   {statusData.map((_, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
@@ -231,7 +234,8 @@ const Relatorios = () => {
                   contentStyle={{ 
                     backgroundColor: 'hsl(var(--card))', 
                     border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px'
+                    borderRadius: '8px',
+                    fontSize: '12px'
                   }}
                 />
               </RechartsPie>

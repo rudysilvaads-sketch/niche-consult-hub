@@ -298,23 +298,23 @@ const Configuracoes = () => {
         subtitle="Gerencie seu perfil profissional e preferências"
       />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Sidebar Navigation */}
-        <div className="glass-card p-4">
-          <nav className="space-y-1">
+      <div className="flex flex-col lg:grid lg:grid-cols-4 gap-4 sm:gap-6">
+        {/* Sidebar Navigation - Horizontal on mobile */}
+        <div className="glass-card p-2 sm:p-4 lg:order-none order-first">
+          <nav className="flex lg:flex-col gap-1 overflow-x-auto lg:overflow-visible pb-1 lg:pb-0">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200',
+                  'flex items-center gap-2 px-3 py-2 sm:px-4 sm:py-3 rounded-lg transition-all duration-200 whitespace-nowrap flex-shrink-0',
                   activeTab === tab.id
                     ? 'bg-accent text-accent-foreground'
                     : 'hover:bg-secondary text-muted-foreground hover:text-foreground'
                 )}
               >
-                <tab.icon className={cn('h-5 w-5', activeTab === tab.id && 'text-primary')} />
-                <span className="font-medium">{tab.label}</span>
+                <tab.icon className={cn('h-4 w-4 sm:h-5 sm:w-5', activeTab === tab.id && 'text-primary')} />
+                <span className="font-medium text-sm sm:text-base">{tab.label}</span>
               </button>
             ))}
           </nav>

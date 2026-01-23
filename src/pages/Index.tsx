@@ -72,14 +72,14 @@ const Index = () => {
 
       {/* Stats Grid */}
       <motion.div 
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
+        className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
       >
         <motion.div variants={staggerItem}>
           <StatCard
-            title="Total de Pacientes"
+            title="Pacientes"
             value={stats.totalPatients}
             subtitle="Cadastrados"
             icon={Users}
@@ -89,7 +89,7 @@ const Index = () => {
         </motion.div>
         <motion.div variants={staggerItem}>
           <StatCard
-            title="Pacientes Ativos"
+            title="Ativos"
             value={activePatients}
             subtitle="Em tratamento"
             icon={UserCheck}
@@ -99,7 +99,7 @@ const Index = () => {
         </motion.div>
         <motion.div variants={staggerItem}>
           <StatCard
-            title="Pacientes Inativos"
+            title="Inativos"
             value={inactivePatients}
             subtitle="Não ativos"
             icon={UserX}
@@ -109,9 +109,9 @@ const Index = () => {
         </motion.div>
         <motion.div variants={staggerItem}>
           <StatCard
-            title="Novos (30 dias)"
+            title="Novos"
             value={newPatients}
-            subtitle="Cadastros recentes"
+            subtitle="30 dias"
             icon={TrendingUp}
             iconBgColor="bg-violet-50"
             iconColor="text-violet-500"
@@ -122,62 +122,62 @@ const Index = () => {
 
       {/* Financial Cards */}
       <motion.div 
-        className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"
+        className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6"
         variants={staggerContainer}
         initial="hidden"
         animate="visible"
       >
         <motion.div variants={staggerItem} className="stat-card group" whileHover={{ y: -2 }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-emerald-500" />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
             </div>
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-600">
+            <span className="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-emerald-50 text-emerald-600">
               Este mês
             </span>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Receitas</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Receitas</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-emerald-600 tracking-tight">{formatCurrency(stats.monthRevenue)}</p>
-            <ArrowUpRight className="h-4 w-4 text-emerald-500" />
+            <p className="text-xl sm:text-2xl font-bold text-emerald-600 tracking-tight truncate">{formatCurrency(stats.monthRevenue)}</p>
+            <ArrowUpRight className="h-3 w-3 sm:h-4 sm:w-4 text-emerald-500 flex-shrink-0" />
           </div>
         </motion.div>
 
         <motion.div variants={staggerItem} className="stat-card group" whileHover={{ y: -2 }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-primary" />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             </div>
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-primary/10 text-primary">
+            <span className="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-primary/10 text-primary">
               Lucro
             </span>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">Saldo do Mês</p>
-          <p className="text-2xl font-bold text-primary tracking-tight">{formatCurrency(stats.monthRevenue - stats.monthExpenses)}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">Saldo do Mês</p>
+          <p className="text-xl sm:text-2xl font-bold text-primary tracking-tight truncate">{formatCurrency(stats.monthRevenue - stats.monthExpenses)}</p>
         </motion.div>
 
         <motion.div variants={staggerItem} className="stat-card group" whileHover={{ y: -2 }}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 text-amber-500" />
+          <div className="flex items-center justify-between mb-3 sm:mb-4">
+            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl bg-amber-50 flex items-center justify-center">
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
             </div>
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-600">
+            <span className="px-2 py-0.5 rounded-md text-[10px] sm:text-[11px] font-medium bg-amber-50 text-amber-600">
               Pendente
             </span>
           </div>
-          <p className="text-sm text-muted-foreground mb-1">A Receber</p>
-          <p className="text-2xl font-bold text-amber-600 tracking-tight">{formatCurrency(stats.pendingPayments)}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground mb-1">A Receber</p>
+          <p className="text-xl sm:text-2xl font-bold text-amber-600 tracking-tight truncate">{formatCurrency(stats.pendingPayments)}</p>
         </motion.div>
       </motion.div>
 
       {/* Main Grid */}
       <motion.div 
-        className="grid grid-cols-1 lg:grid-cols-3 gap-4"
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4"
         initial="hidden"
         animate="visible"
         variants={staggerContainer}
       >
-        <motion.div variants={staggerItem}>
+        <motion.div variants={staggerItem} className="sm:col-span-2 lg:col-span-1">
           <QuickActions 
             onNewAppointment={() => setAppointmentDialogOpen(true)} 
             hasPatients={patients.length > 0}
