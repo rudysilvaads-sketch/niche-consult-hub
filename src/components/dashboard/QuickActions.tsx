@@ -57,8 +57,8 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
   ];
 
   return (
-    <div className="glass-card p-5 h-full">
-      <h3 className="text-sm font-semibold text-foreground mb-4">
+    <div className="glass-card p-4 sm:p-5 h-full">
+      <h3 className="text-sm font-semibold text-foreground mb-3 sm:mb-4">
         Ações Rápidas
       </h3>
       

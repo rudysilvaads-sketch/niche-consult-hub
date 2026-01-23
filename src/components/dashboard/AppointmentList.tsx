@@ -1,4 +1,4 @@
-import { Clock, User, MoreVertical, Video } from 'lucide-react';
+import { Clock, User, MoreVertical, Video, Calendar } from 'lucide-react';
 import { Appointment, STATUS_LABELS, AppointmentStatus } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -38,39 +38,41 @@ export function AppointmentList({
   onStartSession,
 }: AppointmentListProps) {
   return (
-    <div className="card-elevated p-6">
+    <div className="card-elevated p-4 sm:p-6">
       {title && (
-        <h3 className="font-display text-lg font-semibold text-foreground mb-4">{title}</h3>
+        <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">{title}</h3>
       )}
       
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         {appointments.length === 0 ? (
-          <p className="text-center text-muted-foreground py-8">
-            Nenhuma consulta encontrada
-          </p>
+          <div className="text-center py-8">
+            <Calendar className="h-12 w-12 mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-muted-foreground">Nenhuma consulta encontrada</p>
+          </div>
         ) : (
           appointments.map((appointment, index) => (
             <div
               key={appointment.id}
-              className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors animate-slide-up"
+              className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 transition-colors animate-slide-up gap-3"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                  <User className="h-5 w-5 text-primary" />
+              {/* Patient info */}
+              <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-full bg-primary/10 shrink-0">
+                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                <div>
-                  <p className="font-medium text-foreground">{appointment.patientName}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-sm text-muted-foreground flex items-center gap-1">
-                      <Clock className="h-3.5 w-3.5" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-foreground truncate">{appointment.patientName}</p>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-0.5 sm:mt-1">
+                    <span className="text-xs sm:text-sm text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
                       {appointment.time}
                     </span>
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-xs sm:text-sm text-muted-foreground">
                       {appointment.duration} min
                     </span>
                     {showDate && (
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-xs sm:text-sm text-muted-foreground">
                         {new Date(appointment.date).toLocaleDateString('pt-BR')}
                       </span>
                     )}
@@ -78,10 +80,11 @@ export function AppointmentList({
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
+              {/* Actions */}
+              <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3 pl-[52px] sm:pl-0">
                 <span
                   className={cn(
-                    'badge-status border',
+                    'badge-status border text-[10px] sm:text-xs px-2 py-0.5',
                     statusColors[appointment.status]
                   )}
                 >
@@ -94,10 +97,10 @@ export function AppointmentList({
                     size="sm"
                     variant="outline"
                     onClick={() => onStartSession(appointment)}
-                    className="gap-1.5 text-primary border-primary/30 hover:bg-primary/10"
+                    className="gap-1 sm:gap-1.5 text-primary border-primary/30 hover:bg-primary/10 h-8 px-2 sm:px-3 text-xs sm:text-sm"
                   >
-                    <Video className="h-4 w-4" />
-                    Iniciar
+                    <Video className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                    <span className="hidden sm:inline">Iniciar</span>
                   </Button>
                 )}
                 
