@@ -18,6 +18,7 @@ import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useAuth } from '@/contexts/AuthContext';
 import { TranscriptionSegment, AIAnalysis } from '@/types/telehealth';
 import { ShareAnalysisDialog } from '@/components/analysis/ShareAnalysisDialog';
+import { AudioLevelIndicator } from '@/components/telehealth/AudioLevelIndicator';
 
 const VideoRoom = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -466,6 +467,14 @@ const VideoRoom = () => {
 
           {/* Controls */}
           <div className="flex items-center justify-center gap-2 sm:gap-4 py-2">
+            {/* Audio level indicator */}
+            {hasStartedCall && localStream && !isMuted && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-full">
+                <Mic className="h-4 w-4 text-muted-foreground" />
+                <AudioLevelIndicator stream={localStream} barCount={5} />
+              </div>
+            )}
+
             <Button
               size="lg"
               variant={isMuted ? 'destructive' : 'secondary'}
