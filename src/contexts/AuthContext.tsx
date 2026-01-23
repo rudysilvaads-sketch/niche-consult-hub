@@ -6,6 +6,7 @@ import {
   signOut,
   onAuthStateChanged,
   updateProfile,
+  sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth, isFirebaseConfigured } from '@/lib/firebase';
 
@@ -16,6 +17,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, name: string) => Promise<void>;
   logout: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
   error: string | null;
   clearError: () => void;
 }
@@ -104,6 +106,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    if (!auth) {
+      setError('Firebase não está configurado');
+      return;
+    }
+    
+    try {
+      setError(null);
+      await sendPasswordResetEmail(auth, email);
+    } catch (err: any) {
+      const errorMessages: Record<string, string> = {
+        'auth/invalid-email': 'Email inválido',
+        'auth/user-not-found': 'Nenhuma conta encontrada com este email',
+        'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.',
+      };
+      setError(errorMessages[err.code] || 'Erro ao enviar email de recuperação');
+      throw err;
+    }
+  };
+
   const clearError = () => setError(null);
 
   return (
@@ -115,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signIn,
         signUp,
         logout,
+        resetPassword,
         error,
         clearError,
       }}
