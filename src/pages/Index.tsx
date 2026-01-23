@@ -50,32 +50,32 @@ const Index = () => {
           value={stats.totalPatients}
           subtitle="Cadastrados"
           icon={Users}
-          iconBgColor="bg-primary/10"
-          iconColor="text-primary"
+          iconBgColor="bg-blue-50"
+          iconColor="text-blue-500"
         />
         <StatCard
           title="Pacientes Ativos"
           value={activePatients}
           subtitle="Em tratamento"
           icon={UserCheck}
-          iconBgColor="bg-success/10"
-          iconColor="text-success"
+          iconBgColor="bg-green-50"
+          iconColor="text-green-500"
         />
         <StatCard
           title="Pacientes Inativos"
           value={inactivePatients}
           subtitle="Não ativos"
           icon={UserX}
-          iconBgColor="bg-muted"
-          iconColor="text-muted-foreground"
+          iconBgColor="bg-slate-100"
+          iconColor="text-slate-500"
         />
         <StatCard
           title="Novos (30 dias)"
           value={newPatients}
           subtitle="Cadastros recentes"
           icon={TrendingUp}
-          iconBgColor="bg-accent/10"
-          iconColor="text-accent"
+          iconBgColor="bg-violet-50"
+          iconColor="text-violet-500"
           trend={newPatients > 0 ? { value: newPatients * 10, isPositive: true } : undefined}
         />
       </div>
@@ -84,17 +84,17 @@ const Index = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div className="stat-card group">
           <div className="flex items-center justify-between mb-4">
-            <div className="h-10 w-10 rounded-xl bg-success/10 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-success" />
+            <div className="h-10 w-10 rounded-xl bg-emerald-50 flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-emerald-500" />
             </div>
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-success/10 text-success">
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-600">
               Este mês
             </span>
           </div>
           <p className="text-sm text-muted-foreground mb-1">Receitas</p>
           <div className="flex items-baseline gap-2">
-            <p className="text-2xl font-bold text-success tracking-tight">{formatCurrency(stats.monthRevenue)}</p>
-            <ArrowUpRight className="h-4 w-4 text-success" />
+            <p className="text-2xl font-bold text-emerald-600 tracking-tight">{formatCurrency(stats.monthRevenue)}</p>
+            <ArrowUpRight className="h-4 w-4 text-emerald-500" />
           </div>
         </div>
 
@@ -113,15 +113,15 @@ const Index = () => {
 
         <div className="stat-card group">
           <div className="flex items-center justify-between mb-4">
-            <div className="h-10 w-10 rounded-xl bg-warning/10 flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 text-warning" />
+            <div className="h-10 w-10 rounded-xl bg-amber-50 flex items-center justify-center">
+              <AlertCircle className="h-5 w-5 text-amber-500" />
             </div>
-            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-warning/10 text-warning">
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-600">
               Pendente
             </span>
           </div>
           <p className="text-sm text-muted-foreground mb-1">A Receber</p>
-          <p className="text-2xl font-bold text-warning tracking-tight">{formatCurrency(stats.pendingPayments)}</p>
+          <p className="text-2xl font-bold text-amber-600 tracking-tight">{formatCurrency(stats.pendingPayments)}</p>
         </div>
       </div>
 

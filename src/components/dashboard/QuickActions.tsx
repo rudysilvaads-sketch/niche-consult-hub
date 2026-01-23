@@ -13,8 +13,8 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
       icon: UserPlus,
       label: 'Adicionar Paciente',
       description: 'Cadastrar novo paciente',
-      color: 'text-primary',
-      bgColor: 'bg-primary/10',
+      color: 'text-violet-500',
+      bgColor: 'bg-violet-50',
       to: '/pacientes',
       requiresPatient: false,
     },
@@ -22,8 +22,8 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
       icon: Calendar,
       label: 'Agendar Sessão',
       description: hasPatients ? 'Agendar nova consulta' : 'Requer paciente',
-      color: 'text-success',
-      bgColor: 'bg-success/10',
+      color: 'text-green-500',
+      bgColor: 'bg-green-50',
       onClick: onNewAppointment,
       requiresPatient: true,
       disabled: !hasPatients,
@@ -32,8 +32,8 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
       icon: FileText,
       label: 'Ver Documentos',
       description: hasPatients ? 'Recibos e atestados' : 'Requer paciente',
-      color: 'text-accent',
-      bgColor: 'bg-accent/10',
+      color: 'text-pink-500',
+      bgColor: 'bg-pink-50',
       to: '/documentos',
       requiresPatient: true,
       disabled: !hasPatients,
@@ -42,8 +42,8 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
       icon: ClipboardList,
       label: 'Anamnese',
       description: hasPatients ? 'Prontuário do paciente' : 'Requer paciente',
-      color: 'text-warning',
-      bgColor: 'bg-warning/10',
+      color: 'text-orange-500',
+      bgColor: 'bg-orange-50',
       to: '/prontuarios',
       requiresPatient: true,
       disabled: !hasPatients,
@@ -52,8 +52,7 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
 
   return (
     <div className="glass-card p-5 h-full">
-      <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
-        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+      <h3 className="text-sm font-semibold text-foreground mb-4">
         Ações Rápidas
       </h3>
       
@@ -76,7 +75,7 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
                 <p className="text-xs text-muted-foreground">{action.description}</p>
               </div>
               <ChevronRight className={cn(
-                "h-4 w-4 text-muted-foreground/50 transition-transform duration-200 group-hover:translate-x-0.5",
+                "h-4 w-4 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-muted-foreground",
                 action.disabled && 'opacity-0'
               )} />
             </>

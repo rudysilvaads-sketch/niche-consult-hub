@@ -40,7 +40,7 @@ export function UpcomingSessions({ appointments }: UpcomingSessionsProps) {
           {upcomingSessions.map((session, index) => (
             <div
               key={session.id}
-              className="list-item bg-secondary/30 animate-slide-up"
+              className="list-item bg-secondary/50 animate-slide-up"
               style={{ animationDelay: `${index * 50}ms` }}
             >
               <div className="flex flex-col items-center justify-center h-11 w-11 rounded-lg bg-primary/10 shrink-0">
@@ -56,7 +56,7 @@ export function UpcomingSessions({ appointments }: UpcomingSessionsProps) {
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   <span>{session.time}</span>
-                  <span className="text-muted-foreground/50">•</span>
+                  <span className="text-muted-foreground/40">•</span>
                   <span>{session.duration}min</span>
                 </div>
               </div>

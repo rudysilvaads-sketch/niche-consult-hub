@@ -15,8 +15,7 @@ export function RecentPatients({ patients }: RecentPatientsProps) {
   return (
     <div className="glass-card p-5 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-accent" />
+        <h3 className="text-sm font-semibold text-foreground">
           Pacientes Recentes
         </h3>
         <Link to="/pacientes">
