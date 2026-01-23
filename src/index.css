@@ -6,29 +6,29 @@
 
 @layer base {
   :root {
-    /* Professional Purple/Lilac Palette - Espaço Terapêutico */
-    --background: 270 20% 98%;
-    --foreground: 270 25% 15%;
+    /* Professional Dark Purple Theme - WebPsi Style */
+    --background: 263 45% 25%;
+    --foreground: 0 0% 98%;
 
     --card: 0 0% 100%;
-    --card-foreground: 270 25% 15%;
+    --card-foreground: 250 30% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 270 25% 15%;
+    --popover-foreground: 250 30% 20%;
 
-    /* Purple primary - professional, calming, spiritual */
-    --primary: 271 69% 49%;
+    /* Deep Purple/Indigo primary */
+    --primary: 263 70% 50%;
     --primary-foreground: 0 0% 100%;
 
-    /* Soft lavender secondary */
-    --secondary: 270 30% 96%;
-    --secondary-foreground: 270 25% 25%;
+    /* Light backgrounds for contrast */
+    --secondary: 250 25% 95%;
+    --secondary-foreground: 250 30% 25%;
 
-    --muted: 270 15% 94%;
-    --muted-foreground: 270 12% 50%;
+    --muted: 250 20% 92%;
+    --muted-foreground: 250 15% 45%;
 
-    /* Lilac accent - gentle, approachable */
-    --accent: 280 60% 65%;
+    /* Soft lilac/violet accent for buttons */
+    --accent: 270 55% 70%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -42,54 +42,55 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 270 15% 90%;
-    --input: 270 15% 90%;
-    --ring: 271 69% 49%;
+    --border: 250 20% 88%;
+    --input: 250 20% 88%;
+    --ring: 263 70% 50%;
 
-    --radius: 0.75rem;
+    --radius: 0.875rem;
 
-    /* Sidebar - purple tinted */
-    --sidebar-background: 270 25% 97%;
-    --sidebar-foreground: 270 25% 25%;
-    --sidebar-primary: 271 69% 49%;
+    /* Sidebar - dark purple */
+    --sidebar-background: 263 50% 20%;
+    --sidebar-foreground: 0 0% 95%;
+    --sidebar-primary: 270 55% 70%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 30% 94%;
-    --sidebar-accent-foreground: 270 25% 15%;
-    --sidebar-border: 270 15% 90%;
-    --sidebar-ring: 271 69% 49%;
+    --sidebar-accent: 263 45% 28%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 263 40% 30%;
+    --sidebar-ring: 270 55% 70%;
 
-    /* Custom gradients - Purple theme */
-    --gradient-primary: linear-gradient(135deg, hsl(271 69% 49%) 0%, hsl(280 60% 55%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(280 60% 65%) 0%, hsl(290 55% 60%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(270 20% 99%) 100%);
+    /* Custom gradients - Professional lilac/violet */
+    --gradient-primary: linear-gradient(135deg, hsl(270 60% 68%) 0%, hsl(280 55% 72%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(263 45% 25%) 0%, hsl(270 50% 35%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(250 25% 99%) 100%);
+    --gradient-dark: linear-gradient(180deg, hsl(263 50% 22%) 0%, hsl(263 45% 28%) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.05), 0 4px 6px -4px rgb(0 0 0 / 0.05);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+    /* Shadows - more pronounced for dark bg */
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.15), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.2), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 25px 50px -12px rgb(0 0 0 / 0.35);
   }
 
   .dark {
-    --background: 270 30% 8%;
-    --foreground: 270 15% 95%;
+    --background: 263 55% 12%;
+    --foreground: 0 0% 98%;
 
-    --card: 270 28% 12%;
-    --card-foreground: 270 15% 95%;
+    --card: 263 45% 18%;
+    --card-foreground: 0 0% 95%;
 
-    --popover: 270 28% 12%;
-    --popover-foreground: 270 15% 95%;
+    --popover: 263 45% 18%;
+    --popover-foreground: 0 0% 95%;
 
-    --primary: 271 65% 55%;
+    --primary: 270 60% 65%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 270 25% 18%;
-    --secondary-foreground: 270 15% 90%;
+    --secondary: 263 35% 22%;
+    --secondary-foreground: 0 0% 90%;
 
-    --muted: 270 25% 20%;
-    --muted-foreground: 270 12% 60%;
+    --muted: 263 30% 25%;
+    --muted-foreground: 0 0% 60%;
 
-    --accent: 280 55% 60%;
+    --accent: 270 55% 70%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
@@ -101,18 +102,18 @@
     --warning: 38 85% 55%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 270 25% 22%;
-    --input: 270 25% 22%;
-    --ring: 271 65% 55%;
+    --border: 263 35% 28%;
+    --input: 263 35% 28%;
+    --ring: 270 60% 65%;
 
-    --sidebar-background: 270 30% 7%;
-    --sidebar-foreground: 270 15% 90%;
-    --sidebar-primary: 271 65% 55%;
+    --sidebar-background: 263 55% 10%;
+    --sidebar-foreground: 0 0% 92%;
+    --sidebar-primary: 270 55% 70%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 270 25% 15%;
-    --sidebar-accent-foreground: 270 15% 95%;
-    --sidebar-border: 270 25% 18%;
-    --sidebar-ring: 271 65% 55%;
+    --sidebar-accent: 263 40% 18%;
+    --sidebar-accent-foreground: 0 0% 95%;
+    --sidebar-border: 263 35% 22%;
+    --sidebar-ring: 270 55% 70%;
   }
 }
 
