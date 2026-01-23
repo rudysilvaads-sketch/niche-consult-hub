@@ -1,5 +1,7 @@
-import { Bell, Search, Plus, Command } from 'lucide-react';
+import { Bell, Search, Plus, Command, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTheme } from '@/contexts/ThemeContext';
+import { motion } from 'framer-motion';
 
 interface HeaderProps {
   title: string;
@@ -8,6 +10,12 @@ interface HeaderProps {
 }
 
 export function Header({ title, subtitle, onNewAppointment }: HeaderProps) {
+  const { resolvedTheme, setTheme } = useTheme();
+
+  const toggleTheme = () => {
+    setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+  };
+
   return (
     <header className="flex items-center justify-between mb-8">
       <div className="space-y-0.5">
@@ -17,7 +25,7 @@ export function Header({ title, subtitle, onNewAppointment }: HeaderProps) {
         )}
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         {/* Search */}
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -30,6 +38,26 @@ export function Header({ title, subtitle, onNewAppointment }: HeaderProps) {
             <span className="text-[10px] font-medium">K</span>
           </div>
         </div>
+
+        {/* Theme Toggle */}
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggleTheme}
+          className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-secondary"
+        >
+          <motion.div
+            initial={false}
+            animate={{ rotate: resolvedTheme === 'dark' ? 180 : 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {resolvedTheme === 'dark' ? (
+              <Moon className="h-[18px] w-[18px]" />
+            ) : (
+              <Sun className="h-[18px] w-[18px]" />
+            )}
+          </motion.div>
+        </Button>
 
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-secondary">
