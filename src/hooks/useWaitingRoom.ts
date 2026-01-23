@@ -8,6 +8,14 @@ interface WaitingParticipant {
   joinedAt: string;
 }
 
+interface WaitingRoomMessage {
+  id: string;
+  sender: 'host' | 'patient';
+  senderName: string;
+  text: string;
+  timestamp: string;
+}
+
 interface UseWaitingRoomProps {
   sessionId: string;
   isHost: boolean;
@@ -16,6 +24,7 @@ interface UseWaitingRoomProps {
 
 export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitingRoomProps) {
   const [waitingParticipants, setWaitingParticipants] = useState<WaitingParticipant[]>([]);
+  const [messages, setMessages] = useState<WaitingRoomMessage[]>([]);
   const [isAdmitted, setIsAdmitted] = useState(false);
   const [isDenied, setIsDenied] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -46,8 +55,10 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
         const waiting = data.waitingParticipants || [];
         const admitted: string[] = data.admittedParticipants || [];
         const denied: string[] = data.deniedParticipants || [];
+        const roomMessages: WaitingRoomMessage[] = data.waitingRoomMessages || [];
 
         setWaitingParticipants(waiting);
+        setMessages(roomMessages);
 
         // Check if current participant was admitted or denied
         if (!isHost && currentParticipantName) {
@@ -162,8 +173,32 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
     }
   }, [sessionId, isHost]);
 
+  // Send message to waiting room
+  const sendMessage = useCallback(async (text: string, senderName: string) => {
+    if (!isFirebaseConfigured || !db || !sessionId || !text.trim()) return;
+
+    const callDoc = doc(db, 'calls', sessionId);
+    const message: WaitingRoomMessage = {
+      id: `msg-${Date.now()}`,
+      sender: isHost ? 'host' : 'patient',
+      senderName,
+      text: text.trim(),
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      await updateDoc(callDoc, {
+        waitingRoomMessages: arrayUnion(message),
+      });
+      console.log('✅ Message sent:', text);
+    } catch (error) {
+      console.error('❌ Error sending message:', error);
+    }
+  }, [sessionId, isHost]);
+
   return {
     waitingParticipants,
+    messages,
     isAdmitted,
     isDenied,
     loading,
@@ -171,5 +206,6 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
     leaveWaitingRoom,
     admitParticipant,
     denyParticipant,
+    sendMessage,
   };
 }
