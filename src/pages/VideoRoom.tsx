@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Video, VideoOff, Mic, MicOff, Phone, PhoneOff, 
   MessageSquare, FileText, Clock, User, AlertCircle,
-  Loader2, Brain, Download, Share2
+  Loader2, Brain, Share2, Copy, Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
-import { useVideoSession, useWebRTC } from '@/hooks/useVideoSession';
+import { useVideoSession } from '@/hooks/useVideoSession';
+import { useWebRTCConnection } from '@/hooks/useWebRTC';
 import { useTranscription } from '@/hooks/useTranscription';
 import { useAIAnalysis } from '@/hooks/useAIAnalysis';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,6 +21,7 @@ import { ShareAnalysisDialog } from '@/components/analysis/ShareAnalysisDialog';
 
 const VideoRoom = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   
@@ -33,8 +35,12 @@ const VideoRoom = () => {
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<AIAnalysis | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
+  const [hasStartedCall, setHasStartedCall] = useState(false);
 
-  const isTherapist = true; // In production, determine from user role
+  // Determine if user is the host (therapist) or guest (patient)
+  const isHost = searchParams.get('role') !== 'patient';
+  const isTherapist = isHost;
 
   const {
     session,
@@ -49,14 +55,19 @@ const VideoRoom = () => {
   const {
     localStream,
     remoteStream,
-    isConnected,
+    connectionState,
     isMuted,
     isVideoOff,
-    initializeMedia,
+    error: webrtcError,
+    startConnection,
     toggleMute,
     toggleVideo,
     cleanup,
-  } = useWebRTC(sessionId || '', isTherapist);
+    isConnected,
+  } = useWebRTCConnection({
+    sessionId: sessionId || '',
+    isHost,
+  });
 
   const { isAnalyzing, analyzeSession } = useAIAnalysis();
 
@@ -67,7 +78,7 @@ const VideoRoom = () => {
         const segment: TranscriptionSegment = {
           id: Date.now().toString(),
           sessionId: sessionId || '',
-          speaker: result.speaker || 'therapist',
+          speaker: result.speaker || (isTherapist ? 'therapist' : 'patient'),
           text: result.text.trim(),
           timestamp: sessionStartTime 
             ? (Date.now() - sessionStartTime.getTime()) / 1000 
@@ -79,7 +90,7 @@ const VideoRoom = () => {
         addTranscriptionSegment(segment.speaker, segment.text, segment.timestamp);
       }
     },
-    [sessionId, sessionStartTime, addTranscriptionSegment]
+    [sessionId, sessionStartTime, addTranscriptionSegment, isTherapist]
   );
 
   const { isListening, startListening, stopListening, error: transcriptionError } = useTranscription({
@@ -119,25 +130,55 @@ const VideoRoom = () => {
     }
   }, [remoteStream]);
 
+  // Generate patient link
+  const getPatientLink = () => {
+    const baseUrl = window.location.origin;
+    return `${baseUrl}/video/${sessionId}?role=patient`;
+  };
+
+  const copyPatientLink = async () => {
+    try {
+      await navigator.clipboard.writeText(getPatientLink());
+      setLinkCopied(true);
+      toast.success('Link copiado! Envie para o paciente.');
+      setTimeout(() => setLinkCopied(false), 3000);
+    } catch {
+      toast.error('Erro ao copiar link');
+    }
+  };
+
   const handleStartSession = async () => {
     try {
-      await initializeMedia();
-      if (sessionId) {
+      setHasStartedCall(true);
+      await startConnection();
+      
+      if (sessionId && isHost) {
         await startSession(sessionId);
       }
+      
       setSessionStartTime(new Date());
-      await startListening();
-      toast.success('Sessão iniciada! Transcrição ativa.');
+      
+      // Start transcription after a short delay
+      setTimeout(async () => {
+        try {
+          await startListening();
+          toast.success('Sessão iniciada! Transcrição ativa.');
+        } catch (err) {
+          console.warn('Transcription not available:', err);
+          toast.success('Sessão iniciada!');
+        }
+      }, 1000);
     } catch (error) {
       console.error('Error starting session:', error);
       toast.error('Erro ao iniciar sessão');
+      setHasStartedCall(false);
     }
   };
 
   const handleEndSession = async () => {
     stopListening();
     
-    if (sessionId) {
+    if (sessionId && isHost) {
       await endSession(sessionId);
     }
     
@@ -146,7 +187,7 @@ const VideoRoom = () => {
       .map((seg) => `[${seg.speaker === 'therapist' ? 'Terapeuta' : 'Paciente'}]: ${seg.text}`)
       .join('\n');
 
-    if (fullTranscription) {
+    if (fullTranscription && isHost) {
       toast.loading('Analisando sessão com IA...');
       
       const analysisResult = await analyzeSession({
@@ -167,6 +208,10 @@ const VideoRoom = () => {
 
     cleanup();
     toast.success('Sessão finalizada');
+    
+    if (!isHost) {
+      navigate('/');
+    }
   };
 
   const formatTimestamp = (seconds: number) => {
@@ -185,7 +230,7 @@ const VideoRoom = () => {
 
   if (showAnalysis && analysis) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted p-6">
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted p-4 sm:p-6">
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardHeader>
@@ -292,23 +337,28 @@ const VideoRoom = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <div className="bg-card border-b px-6 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <div className="bg-card border-b px-3 sm:px-6 py-3 flex items-center justify-between">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2">
             <Video className="h-5 w-5 text-primary" />
-            <span className="font-semibold">Sala Virtual</span>
+            <span className="font-semibold text-sm sm:text-base">Sala Virtual</span>
           </div>
           {session && (
-            <Badge variant="outline">{session.patientName}</Badge>
+            <Badge variant="outline" className="hidden sm:inline-flex">{session.patientName}</Badge>
           )}
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-4">
           <div className="flex items-center gap-2 text-muted-foreground">
             <Clock className="h-4 w-4" />
-            <span className="font-mono">{elapsedTime}</span>
+            <span className="font-mono text-sm">{elapsedTime}</span>
           </div>
+          {isConnected && (
+            <Badge className="bg-success text-xs">
+              Conectado
+            </Badge>
+          )}
           {isListening && (
-            <Badge className="bg-success animate-pulse">
+            <Badge className="bg-success animate-pulse hidden sm:flex">
               <Mic className="h-3 w-3 mr-1" />
               Transcrevendo
             </Badge>
@@ -317,11 +367,56 @@ const VideoRoom = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex">
+      <div className="flex-1 flex flex-col lg:flex-row">
         {/* Video Area */}
-        <div className="flex-1 p-4 flex flex-col gap-4">
+        <div className="flex-1 p-2 sm:p-4 flex flex-col gap-3 sm:gap-4">
+          {/* Connection Status / Share Link */}
+          {isHost && !hasStartedCall && (
+            <Card className="bg-primary/5 border-primary/20">
+              <CardContent className="p-4">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div>
+                    <h4 className="font-semibold text-sm">Link para o Paciente</h4>
+                    <p className="text-xs text-muted-foreground">
+                      Compartilhe este link com o paciente para iniciar a sessão
+                    </p>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={copyPatientLink}
+                    className="gap-2"
+                  >
+                    {linkCopied ? (
+                      <>
+                        <Check className="h-4 w-4 text-success" />
+                        Copiado!
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        Copiar Link
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {webrtcError && (
+            <Card className="bg-destructive/10 border-destructive/20">
+              <CardContent className="p-4">
+                <p className="text-destructive text-sm flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  {webrtcError}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
           {/* Remote Video (Main) */}
-          <div className="flex-1 bg-muted rounded-xl overflow-hidden relative">
+          <div className="flex-1 bg-muted rounded-xl overflow-hidden relative min-h-[300px] sm:min-h-[400px]">
             {remoteStream ? (
               <video
                 ref={remoteVideoRef}
@@ -331,17 +426,22 @@ const VideoRoom = () => {
               />
             ) : (
               <div className="w-full h-full flex flex-col items-center justify-center">
-                <User className="h-24 w-24 text-muted-foreground/30 mb-4" />
-                <p className="text-muted-foreground">
-                  {session?.status === 'waiting' 
-                    ? 'Aguardando participante...' 
-                    : 'Câmera do participante desativada'}
+                <User className="h-16 sm:h-24 w-16 sm:w-24 text-muted-foreground/30 mb-4" />
+                <p className="text-muted-foreground text-center px-4 text-sm sm:text-base">
+                  {!hasStartedCall 
+                    ? 'Clique em "Iniciar Sessão" para começar'
+                    : connectionState === 'connecting'
+                    ? 'Conectando...'
+                    : 'Aguardando participante...'}
                 </p>
+                {connectionState === 'connecting' && (
+                  <Loader2 className="h-6 w-6 animate-spin text-primary mt-4" />
+                )}
               </div>
             )}
 
             {/* Local Video (PiP) */}
-            <div className="absolute bottom-4 right-4 w-48 h-36 bg-background rounded-lg overflow-hidden shadow-lg border">
+            <div className="absolute bottom-2 right-2 sm:bottom-4 sm:right-4 w-24 h-18 sm:w-48 sm:h-36 bg-background rounded-lg overflow-hidden shadow-lg border">
               {localStream && !isVideoOff ? (
                 <video
                   ref={localVideoRef}
@@ -352,59 +452,62 @@ const VideoRoom = () => {
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-muted">
-                  <User className="h-12 w-12 text-muted-foreground/30" />
+                  <User className="h-8 sm:h-12 w-8 sm:w-12 text-muted-foreground/30" />
                 </div>
               )}
             </div>
           </div>
 
           {/* Controls */}
-          <div className="flex items-center justify-center gap-4">
+          <div className="flex items-center justify-center gap-2 sm:gap-4 py-2">
             <Button
               size="lg"
               variant={isMuted ? 'destructive' : 'secondary'}
               onClick={toggleMute}
-              className="rounded-full w-14 h-14"
+              className="rounded-full w-12 h-12 sm:w-14 sm:h-14"
+              disabled={!hasStartedCall}
             >
-              {isMuted ? <MicOff className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
+              {isMuted ? <MicOff className="h-5 w-5 sm:h-6 sm:w-6" /> : <Mic className="h-5 w-5 sm:h-6 sm:w-6" />}
             </Button>
 
             <Button
               size="lg"
               variant={isVideoOff ? 'destructive' : 'secondary'}
               onClick={toggleVideo}
-              className="rounded-full w-14 h-14"
+              className="rounded-full w-12 h-12 sm:w-14 sm:h-14"
+              disabled={!hasStartedCall}
             >
-              {isVideoOff ? <VideoOff className="h-6 w-6" /> : <Video className="h-6 w-6" />}
+              {isVideoOff ? <VideoOff className="h-5 w-5 sm:h-6 sm:w-6" /> : <Video className="h-5 w-5 sm:h-6 sm:w-6" />}
             </Button>
 
             <Button
               size="lg"
               variant={showTranscript ? 'default' : 'secondary'}
               onClick={() => setShowTranscript(!showTranscript)}
-              className="rounded-full w-14 h-14"
+              className="rounded-full w-12 h-12 sm:w-14 sm:h-14 hidden lg:flex"
             >
-              <MessageSquare className="h-6 w-6" />
+              <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
             </Button>
 
-            {!sessionStartTime ? (
+            {!hasStartedCall ? (
               <Button
                 size="lg"
                 onClick={handleStartSession}
-                className="btn-gradient rounded-full px-8"
+                className="btn-gradient rounded-full px-6 sm:px-8"
               >
                 <Phone className="h-5 w-5 mr-2" />
-                Iniciar Sessão
+                <span className="hidden sm:inline">Iniciar Sessão</span>
+                <span className="sm:hidden">Iniciar</span>
               </Button>
             ) : (
               <Button
                 size="lg"
                 variant="destructive"
                 onClick={handleEndSession}
-                className="rounded-full px-8"
+                className="rounded-full px-6 sm:px-8"
               >
                 <PhoneOff className="h-5 w-5 mr-2" />
-                Encerrar
+                <span className="hidden sm:inline">Encerrar</span>
               </Button>
             )}
           </div>
@@ -412,9 +515,9 @@ const VideoRoom = () => {
 
         {/* Transcript Sidebar */}
         {showTranscript && (
-          <div className="w-96 border-l bg-card flex flex-col">
-            <div className="p-4 border-b">
-              <h3 className="font-semibold flex items-center gap-2">
+          <div className="w-full lg:w-96 border-t lg:border-t-0 lg:border-l bg-card flex flex-col max-h-64 lg:max-h-none">
+            <div className="p-3 sm:p-4 border-b">
+              <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
                 <FileText className="h-4 w-4" />
                 Transcrição em Tempo Real
               </h3>
@@ -422,10 +525,10 @@ const VideoRoom = () => {
                 <p className="text-xs text-destructive mt-1">{transcriptionError}</p>
               )}
             </div>
-            <ScrollArea className="flex-1 p-4">
+            <ScrollArea className="flex-1 p-3 sm:p-4">
               <div className="space-y-3">
                 {liveTranscript.length === 0 ? (
-                  <p className="text-muted-foreground text-sm text-center py-8">
+                  <p className="text-muted-foreground text-xs sm:text-sm text-center py-4 sm:py-8">
                     A transcrição aparecerá aqui quando a sessão iniciar
                   </p>
                 ) : (
@@ -439,7 +542,7 @@ const VideoRoom = () => {
                           {formatTimestamp(segment.timestamp)}
                         </span>
                       </div>
-                      <p className="text-sm">{segment.text}</p>
+                      <p className="text-xs sm:text-sm">{segment.text}</p>
                     </div>
                   ))
                 )}
