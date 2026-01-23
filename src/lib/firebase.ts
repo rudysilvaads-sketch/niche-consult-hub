@@ -2,27 +2,17 @@ import { initializeApp, FirebaseApp } from 'firebase/app';
 import { getFirestore, Firestore } from 'firebase/firestore';
 import { getAuth, Auth } from 'firebase/auth';
 
+// Firebase configuration - these are publishable keys (safe to include in client code)
 const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.firebaseapp.com`,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: `${import.meta.env.VITE_FIREBASE_PROJECT_ID}.appspot.com`,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  apiKey: "AIzaSyCbyZT6Dom3suS58Da2Yz4jZ_dmks0qdC0",
+  authDomain: "consult-hub-5715b.firebaseapp.com",
+  projectId: "consult-hub-5715b",
+  storageBucket: "consult-hub-5715b.appspot.com",
+  appId: "1:180611397136:web:96b191a349165bee2a7c95",
 };
 
-// Debug: Log environment variables (remove in production)
-console.log('Firebase Config Check:', {
-  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
-  hasProjectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  hasAppId: !!import.meta.env.VITE_FIREBASE_APP_ID,
-});
-
-// Check if Firebase is properly configured
-export const isFirebaseConfigured = !!(
-  import.meta.env.VITE_FIREBASE_API_KEY &&
-  import.meta.env.VITE_FIREBASE_PROJECT_ID &&
-  import.meta.env.VITE_FIREBASE_APP_ID
-);
+// Firebase is always configured with hardcoded values
+export const isFirebaseConfigured = true;
 
 let app: FirebaseApp | null = null;
 let db: Firestore | null = null;
