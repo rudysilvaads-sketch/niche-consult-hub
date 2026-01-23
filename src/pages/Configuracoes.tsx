@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { User, Building, Bell, Shield, Palette, Camera, Loader2, X, Plus, Upload, Check } from 'lucide-react';
+import { User, Building, Bell, Shield, Palette, Camera, Loader2, X, Plus, Upload, Check, Moon, Sun, Monitor } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,7 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
+import { useTheme } from '@/contexts/ThemeContext';
 
 const tabs = [
   { id: 'profile', label: 'Perfil', icon: User },
@@ -47,6 +48,7 @@ const colorPresets = [
 
 const Configuracoes = () => {
   const { user } = useAuth();
+  const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState('profile');
@@ -641,6 +643,35 @@ const Configuracoes = () => {
                 </div>
                 <p className="text-xs text-muted-foreground mt-3">
                   Esta cor será usada nos botões, links e acentos do sistema.
+                </p>
+              </div>
+
+              {/* Theme Selection */}
+              <div className="p-5 rounded-xl bg-secondary/30 border border-border">
+                <Label className="mb-4 block">Tema da Interface</Label>
+                <div className="flex items-center gap-2">
+                  {[
+                    { value: 'light' as const, icon: Sun, label: 'Claro' },
+                    { value: 'dark' as const, icon: Moon, label: 'Escuro' },
+                    { value: 'system' as const, icon: Monitor, label: 'Sistema' },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setTheme(option.value)}
+                      className={cn(
+                        'flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 border',
+                        theme === option.value
+                          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                          : 'bg-background text-muted-foreground hover:text-foreground border-border hover:border-primary/50'
+                      )}
+                    >
+                      <option.icon className="h-4 w-4" />
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Escolha entre tema claro, escuro ou automático (baseado no sistema).
                 </p>
               </div>
 
