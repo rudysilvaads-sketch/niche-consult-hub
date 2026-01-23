@@ -8,6 +8,8 @@ interface AnalysisRequest {
   previousNotes?: string;
 }
 
+const LAOZHANG_API_URL = 'https://api.laozhang.ai/v1/chat/completions';
+
 export function useAIAnalysis() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -23,45 +25,99 @@ export function useAIAnalysis() {
         // Progress simulation for UI feedback
         const progressInterval = setInterval(() => {
           setProgress((prev) => Math.min(prev + 5, 90));
-        }, 200);
+        }, 300);
 
-        // Use Lovable AI API for analysis
-        const response = await fetch('/api/analyze-session', {
+        const systemPrompt = `Você é um assistente especializado em psicologia clínica e terapia. 
+Analise a transcrição da sessão terapêutica fornecida e gere uma análise estruturada.
+
+IMPORTANTE: Responda APENAS em JSON válido, sem texto adicional antes ou depois.
+
+O JSON deve ter exatamente esta estrutura:
+{
+  "summary": "Resumo da sessão em 2-3 frases",
+  "keyTopics": ["tópico1", "tópico2", "tópico3"],
+  "emotionalState": "Descrição do estado emocional observado",
+  "suggestedFollowUp": ["sugestão1", "sugestão2"],
+  "preDiagnosis": "Observações clínicas preliminares (não é diagnóstico definitivo)",
+  "riskIndicators": ["indicador1"] ou null se não houver,
+  "therapeuticNotes": "Notas para o terapeuta sobre a sessão"
+}`;
+
+        const userPrompt = `Paciente: ${request.patientName}
+Duração da sessão: ${request.sessionDuration} minutos
+${request.previousNotes ? `Notas anteriores: ${request.previousNotes}` : ''}
+
+Transcrição da sessão:
+${request.transcription}
+
+Analise esta sessão e forneça a análise estruturada em JSON.`;
+
+        const response = await fetch(LAOZHANG_API_URL, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_LAOZHANG_API_KEY || ''}`,
           },
           body: JSON.stringify({
-            transcription: request.transcription,
-            patientName: request.patientName,
-            sessionDuration: request.sessionDuration,
-            previousNotes: request.previousNotes,
+            model: 'deepseek-v3',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              { role: 'user', content: userPrompt },
+            ],
+            temperature: 0.7,
+            max_tokens: 2000,
           }),
         });
 
         clearInterval(progressInterval);
 
         if (!response.ok) {
-          // Fallback to local analysis if API is not available
+          console.error('Laozhang API error:', response.status);
+          // Fallback to local analysis
           const localAnalysis = performLocalAnalysis(request);
           setProgress(100);
           return localAnalysis;
         }
 
         const data = await response.json();
+        const content = data.choices?.[0]?.message?.content;
+
+        if (!content) {
+          throw new Error('Empty response from API');
+        }
+
+        // Parse the JSON response
+        let analysisData;
+        try {
+          // Try to extract JSON from the response
+          const jsonMatch = content.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            analysisData = JSON.parse(jsonMatch[0]);
+          } else {
+            throw new Error('No JSON found in response');
+          }
+        } catch (parseError) {
+          console.error('Failed to parse AI response:', parseError);
+          // Fallback to local analysis
+          const localAnalysis = performLocalAnalysis(request);
+          setProgress(100);
+          return localAnalysis;
+        }
+
         setProgress(100);
 
         return {
-          summary: data.summary,
-          keyTopics: data.keyTopics,
-          emotionalState: data.emotionalState,
-          suggestedFollowUp: data.suggestedFollowUp,
-          preDiagnosis: data.preDiagnosis,
-          riskIndicators: data.riskIndicators,
-          therapeuticNotes: data.therapeuticNotes,
+          summary: analysisData.summary || 'Análise da sessão concluída.',
+          keyTopics: analysisData.keyTopics || ['Acompanhamento geral'],
+          emotionalState: analysisData.emotionalState || 'Não identificado',
+          suggestedFollowUp: analysisData.suggestedFollowUp || ['Continuar acompanhamento'],
+          preDiagnosis: analysisData.preDiagnosis || 'Sem indicações específicas.',
+          riskIndicators: analysisData.riskIndicators || undefined,
+          therapeuticNotes: analysisData.therapeuticNotes || 'Sessão transcorreu normalmente.',
         };
       } catch (err) {
         console.error('AI Analysis error:', err);
+        setError(err instanceof Error ? err.message : 'Erro na análise');
         
         // Fallback to local analysis
         const localAnalysis = performLocalAnalysis(request);
