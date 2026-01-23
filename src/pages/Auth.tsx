@@ -413,7 +413,7 @@ const Auth = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.8 }}
         >
-          © 2024 Espaço Terapêutico. Todos os direitos reservados.
+          © 2026 Espaço Terapêutico. Todos os direitos reservados.
         </motion.p>
       </div>
     </div>
