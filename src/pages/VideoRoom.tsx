@@ -22,6 +22,7 @@ import { AudioLevelIndicator } from '@/components/telehealth/AudioLevelIndicator
 import { WaitingRoom } from '@/components/telehealth/WaitingRoom';
 import { WaitingPatientCard } from '@/components/telehealth/WaitingPatientCard';
 import { useWaitingRoom } from '@/hooks/useWaitingRoom';
+import { useNotificationSound } from '@/hooks/useNotificationSound';
 
 const VideoRoom = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -72,6 +73,21 @@ const VideoRoom = () => {
     isHost,
     participantName: patientName,
   });
+
+  // Notification sound for host
+  const { playNotificationSound } = useNotificationSound();
+  const previousWaitingCountRef = useRef(0);
+
+  // Play notification sound when new patient joins waiting room
+  useEffect(() => {
+    if (isHost && waitingParticipants.length > previousWaitingCountRef.current) {
+      playNotificationSound();
+      toast.info('Novo paciente na sala de espera!', {
+        icon: '🔔',
+      });
+    }
+    previousWaitingCountRef.current = waitingParticipants.length;
+  }, [isHost, waitingParticipants.length, playNotificationSound]);
 
   // For patients: automatically start call when admitted
   useEffect(() => {
