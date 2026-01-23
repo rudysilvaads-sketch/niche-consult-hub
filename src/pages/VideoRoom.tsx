@@ -19,6 +19,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { TranscriptionSegment, AIAnalysis } from '@/types/telehealth';
 import { ShareAnalysisDialog } from '@/components/analysis/ShareAnalysisDialog';
 import { AudioLevelIndicator } from '@/components/telehealth/AudioLevelIndicator';
+import { WaitingRoom } from '@/components/telehealth/WaitingRoom';
+import { WaitingPatientCard } from '@/components/telehealth/WaitingPatientCard';
+import { useWaitingRoom } from '@/hooks/useWaitingRoom';
 
 const VideoRoom = () => {
   const { sessionId } = useParams<{ sessionId: string }>();
@@ -38,6 +41,8 @@ const VideoRoom = () => {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [hasStartedCall, setHasStartedCall] = useState(false);
+  const [patientName, setPatientName] = useState<string>('');
+  const [hasEnteredWaitingRoom, setHasEnteredWaitingRoom] = useState(false);
 
   // Determine if user is the host (therapist) or guest (patient)
   const isHost = searchParams.get('role') !== 'patient';
@@ -52,6 +57,38 @@ const VideoRoom = () => {
     addTranscriptionSegment,
     saveAIAnalysis,
   } = useVideoSession(sessionId);
+
+  // Waiting room
+  const {
+    waitingParticipants,
+    isAdmitted,
+    isDenied,
+    joinWaitingRoom,
+    leaveWaitingRoom,
+    admitParticipant,
+    denyParticipant,
+  } = useWaitingRoom({
+    sessionId: sessionId || '',
+    isHost,
+    participantName: patientName,
+  });
+
+  // For patients: automatically start call when admitted
+  useEffect(() => {
+    if (!isHost && isAdmitted && hasEnteredWaitingRoom && !hasStartedCall) {
+      console.log('✅ Patient admitted, starting call...');
+      handleStartSession();
+    }
+  }, [isAdmitted, hasEnteredWaitingRoom, hasStartedCall, isHost]);
+
+  // Cleanup waiting room on unmount
+  useEffect(() => {
+    return () => {
+      if (!isHost && patientName && hasEnteredWaitingRoom) {
+        leaveWaitingRoom(patientName);
+      }
+    };
+  }, [isHost, patientName, hasEnteredWaitingRoom, leaveWaitingRoom]);
 
   const {
     localStream,
@@ -229,6 +266,84 @@ const VideoRoom = () => {
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Patient denied access
+  if (!isHost && isDenied) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+        <Card className="max-w-md w-full">
+          <CardContent className="pt-8 pb-8 text-center space-y-6">
+            <div className="w-16 h-16 rounded-full bg-destructive/20 mx-auto flex items-center justify-center">
+              <AlertCircle className="w-8 h-8 text-destructive" />
+            </div>
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">Acesso Negado</h2>
+              <p className="text-muted-foreground">
+                O profissional não admitiu sua entrada nesta sessão.
+              </p>
+            </div>
+            <Button onClick={() => navigate('/')} variant="outline">
+              Voltar ao Início
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Patient waiting room - need to enter name and wait
+  if (!isHost && !isAdmitted && !hasStartedCall) {
+    if (!hasEnteredWaitingRoom) {
+      // Patient needs to enter their name
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
+          <Card className="max-w-md w-full">
+            <CardContent className="pt-8 pb-8 space-y-6">
+              <div className="text-center space-y-2">
+                <div className="w-16 h-16 rounded-full bg-primary/20 mx-auto flex items-center justify-center">
+                  <Video className="w-8 h-8 text-primary" />
+                </div>
+                <h2 className="text-xl font-semibold">Entrar na Sala Virtual</h2>
+                <p className="text-muted-foreground text-sm">
+                  Digite seu nome para entrar na sala de espera
+                </p>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Seu nome</label>
+                  <input
+                    type="text"
+                    value={patientName}
+                    onChange={(e) => setPatientName(e.target.value)}
+                    placeholder="Digite seu nome completo"
+                    className="w-full px-3 py-2 border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+                    autoFocus
+                  />
+                </div>
+                
+                <Button 
+                  onClick={async () => {
+                    if (patientName.trim()) {
+                      await joinWaitingRoom(patientName.trim());
+                      setHasEnteredWaitingRoom(true);
+                    }
+                  }}
+                  disabled={!patientName.trim()}
+                  className="w-full btn-gradient"
+                >
+                  Entrar na Sala de Espera
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
+    // Patient is in waiting room
+    return <WaitingRoom patientName={patientName} />;
   }
 
   if (showAnalysis && analysis) {
@@ -411,6 +526,21 @@ const VideoRoom = () => {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Waiting Patients (Host view) */}
+          {isHost && waitingParticipants.length > 0 && (
+            <div className="space-y-2">
+              {waitingParticipants.map((participant) => (
+                <WaitingPatientCard
+                  key={participant.odid}
+                  patientName={participant.name}
+                  waitingSince={new Date(participant.joinedAt)}
+                  onAdmit={() => admitParticipant(participant)}
+                  onDeny={() => denyParticipant(participant)}
+                />
+              ))}
+            </div>
           )}
 
           {webrtcError && (
