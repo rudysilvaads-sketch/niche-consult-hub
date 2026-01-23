@@ -296,7 +296,7 @@ const VideoRoom = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Video className="h-5 w-5 text-primary" />
-            <span className="font-semibold">WebPsi Meet</span>
+            <span className="font-semibold">Sala Virtual</span>
           </div>
           {session && (
             <Badge variant="outline">{session.patientName}</Badge>
