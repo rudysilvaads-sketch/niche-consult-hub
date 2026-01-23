@@ -19,6 +19,8 @@ import {
   ServicePackage,
   Document,
   DashboardStats,
+  PatientGroup,
+  PatientRelationship,
 } from '@/types';
 import { mockPatients, mockAppointments, mockRecords, mockTransactions, mockPackages, mockDocuments } from '@/data/mockData';
 
@@ -40,6 +42,8 @@ export function useAppData() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [packages, setPackages] = useState<ServicePackage[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
+  const [patientGroups, setPatientGroups] = useState<PatientGroup[]>([]);
+  const [patientRelationships, setPatientRelationships] = useState<PatientRelationship[]>([]);
   const [loading, setLoading] = useState(true);
   const [firebaseConnected, setFirebaseConnected] = useState(false);
 
@@ -107,6 +111,8 @@ export function useAppData() {
     subscribeToCollection('transactions', setTransactions, mockTransactions);
     subscribeToCollection('packages', setPackages, mockPackages);
     subscribeToCollection('documents', setDocuments, mockDocuments);
+    subscribeToCollection('patientGroups', setPatientGroups, []);
+    subscribeToCollection('patientRelationships', setPatientRelationships, []);
 
     return () => {
       unsubscribers.forEach((unsub) => unsub());
@@ -446,6 +452,116 @@ export function useAppData() {
     }
   }, [isFirebaseConfigured]);
 
+  // Patient Group CRUD
+  const addPatientGroup = useCallback(async (group: Partial<PatientGroup>) => {
+    const newGroup: Omit<PatientGroup, 'id'> = {
+      name: group.name || '',
+      type: group.type || 'familia',
+      description: group.description,
+      memberIds: group.memberIds || [],
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+
+    if (isFirebaseConfigured && db) {
+      try {
+        const docRef = await addDoc(collection(db, 'patientGroups'), newGroup);
+        return { id: docRef.id, ...newGroup };
+      } catch (error) {
+        console.error('Error adding patient group:', error);
+        throw error;
+      }
+    } else {
+      const localGroup = { id: Date.now().toString(), ...newGroup };
+      setPatientGroups((prev) => [...prev, localGroup]);
+      return localGroup;
+    }
+  }, [isFirebaseConfigured]);
+
+  const updatePatientGroup = useCallback(async (id: string, updates: Partial<PatientGroup>) => {
+    if (isFirebaseConfigured && db) {
+      try {
+        await updateDoc(doc(db, 'patientGroups', id), updates);
+      } catch (error) {
+        console.error('Error updating patient group:', error);
+        throw error;
+      }
+    } else {
+      setPatientGroups((prev) => prev.map((g) => (g.id === id ? { ...g, ...updates } : g)));
+    }
+  }, [isFirebaseConfigured]);
+
+  const deletePatientGroup = useCallback(async (id: string) => {
+    if (isFirebaseConfigured && db) {
+      try {
+        await deleteDoc(doc(db, 'patientGroups', id));
+      } catch (error) {
+        console.error('Error deleting patient group:', error);
+        throw error;
+      }
+    } else {
+      setPatientGroups((prev) => prev.filter((g) => g.id !== id));
+    }
+  }, [isFirebaseConfigured]);
+
+  // Patient Relationship CRUD
+  const addPatientRelationship = useCallback(async (relationship: Partial<PatientRelationship>) => {
+    const newRelationship: Omit<PatientRelationship, 'id'> = {
+      patientId: relationship.patientId || '',
+      relatedPatientId: relationship.relatedPatientId || '',
+      relationship: relationship.relationship || 'outro',
+      groupId: relationship.groupId,
+      createdAt: new Date().toISOString().split('T')[0],
+    };
+
+    if (isFirebaseConfigured && db) {
+      try {
+        const docRef = await addDoc(collection(db, 'patientRelationships'), newRelationship);
+        return { id: docRef.id, ...newRelationship };
+      } catch (error) {
+        console.error('Error adding patient relationship:', error);
+        throw error;
+      }
+    } else {
+      const localRelationship = { id: Date.now().toString(), ...newRelationship };
+      setPatientRelationships((prev) => [...prev, localRelationship]);
+      return localRelationship;
+    }
+  }, [isFirebaseConfigured]);
+
+  const deletePatientRelationship = useCallback(async (id: string) => {
+    if (isFirebaseConfigured && db) {
+      try {
+        await deleteDoc(doc(db, 'patientRelationships', id));
+      } catch (error) {
+        console.error('Error deleting patient relationship:', error);
+        throw error;
+      }
+    } else {
+      setPatientRelationships((prev) => prev.filter((r) => r.id !== id));
+    }
+  }, [isFirebaseConfigured]);
+
+  // Helper to get related patients for a given patient
+  const getRelatedPatients = useCallback((patientId: string) => {
+    const relationships = patientRelationships.filter(
+      (r) => r.patientId === patientId || r.relatedPatientId === patientId
+    );
+    
+    return relationships.map((r) => {
+      const relatedId = r.patientId === patientId ? r.relatedPatientId : r.patientId;
+      const relatedPatient = patients.find((p) => p.id === relatedId);
+      return {
+        relationship: r,
+        patient: relatedPatient,
+      };
+    }).filter((r) => r.patient !== undefined);
+  }, [patientRelationships, patients]);
+
+  // Helper to get groups for a patient
+  const getPatientGroups = useCallback((patientId: string) => {
+    return patientGroups.filter((g) => g.memberIds.includes(patientId));
+  }, [patientGroups]);
+
   // Calculate stats using useMemo
   const stats = useMemo<DashboardStats>(() => {
     const currentMonth = new Date().getMonth();
@@ -495,6 +611,8 @@ export function useAppData() {
     transactions,
     packages,
     documents,
+    patientGroups,
+    patientRelationships,
     stats,
     loading,
     firebaseConnected,
@@ -516,5 +634,12 @@ export function useAppData() {
     addDocument,
     updateDocument,
     deleteDocument,
+    addPatientGroup,
+    updatePatientGroup,
+    deletePatientGroup,
+    addPatientRelationship,
+    deletePatientRelationship,
+    getRelatedPatients,
+    getPatientGroups,
   };
 }

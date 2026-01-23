@@ -52,6 +52,39 @@ export interface Professional {
 
 export type PatientStatus = 'ativo' | 'inativo';
 
+// Family/Group types
+export type PatientGroupType = 'familia' | 'casal' | 'grupo_terapeutico';
+
+export type RelationshipType = 
+  | 'conjuge'
+  | 'pai'
+  | 'mae'
+  | 'filho'
+  | 'filha'
+  | 'irmao'
+  | 'irma'
+  | 'parceiro'
+  | 'parceira'
+  | 'outro';
+
+export interface PatientGroup {
+  id: string;
+  name: string;
+  type: PatientGroupType;
+  description?: string;
+  memberIds: string[];
+  createdAt: string;
+}
+
+export interface PatientRelationship {
+  id: string;
+  patientId: string;
+  relatedPatientId: string;
+  relationship: RelationshipType;
+  groupId?: string;
+  createdAt: string;
+}
+
 export interface Patient {
   id: string;
   name: string;
@@ -66,6 +99,8 @@ export interface Patient {
   // Financial
   packageId?: string;
   sessionsRemaining?: number;
+  // Groups
+  groupIds?: string[];
 }
 
 export type AppointmentStatus = 'agendado' | 'confirmado' | 'em_andamento' | 'concluido' | 'cancelado';
@@ -238,4 +273,23 @@ export const DOCUMENT_TYPE_LABELS: Record<DocumentType, string> = {
   declaracao: 'Declaração',
   relatorio: 'Relatório',
   receituario: 'Receituário',
+};
+
+export const GROUP_TYPE_LABELS: Record<PatientGroupType, string> = {
+  familia: 'Família',
+  casal: 'Casal',
+  grupo_terapeutico: 'Grupo Terapêutico',
+};
+
+export const RELATIONSHIP_LABELS: Record<RelationshipType, string> = {
+  conjuge: 'Cônjuge',
+  pai: 'Pai',
+  mae: 'Mãe',
+  filho: 'Filho',
+  filha: 'Filha',
+  irmao: 'Irmão',
+  irma: 'Irmã',
+  parceiro: 'Parceiro(a)',
+  parceira: 'Parceira',
+  outro: 'Outro',
 };
