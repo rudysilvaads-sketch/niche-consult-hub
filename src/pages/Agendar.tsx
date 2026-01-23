@@ -15,7 +15,7 @@ import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
-import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { collection, getDocs, query, limit, addDoc, where } from 'firebase/firestore';
 import { ProfessionalProfile, CATEGORY_LABELS, THERAPY_APPROACH_LABELS, TherapyApproach } from '@/types';
 
 // Validation schema
@@ -185,35 +185,58 @@ const Agendar = () => {
     setIsSubmitting(true);
     
     try {
-      // Check if patient already exists by email
-      let patient = patients.find(p => p.email.toLowerCase() === formData.email.toLowerCase());
+      if (!db || !isFirebaseConfigured) {
+        throw new Error('Firebase não configurado');
+      }
+
+      // Check if patient already exists by email using direct Firestore query
+      const patientsRef = collection(db, 'patients');
+      const emailQuery = query(patientsRef, where('email', '==', formData.email.toLowerCase()));
+      const existingPatients = await getDocs(emailQuery);
       
-      if (!patient) {
-        // Create new patient
-        patient = await addPatient({
+      let patientId: string;
+      let patientName = formData.name;
+      
+      if (!existingPatients.empty) {
+        // Use existing patient
+        patientId = existingPatients.docs[0].id;
+        patientName = existingPatients.docs[0].data().name || formData.name;
+      } else {
+        // Create new patient directly in Firestore
+        const newPatientData = {
           name: formData.name,
-          email: formData.email,
+          email: formData.email.toLowerCase(),
           phone: formData.phone,
           birthDate: '',
           cpf: '',
           status: 'ativo',
           notes: 'Cadastrado via agendamento online',
-        });
+          createdAt: new Date().toISOString().split('T')[0],
+        };
+        
+        const patientDocRef = await addDoc(patientsRef, newPatientData);
+        patientId = patientDocRef.id;
       }
       
       const consultationType = CONSULTATION_TYPES.find(t => t.id === selectedType);
       
-      // Create appointment
-      await addAppointment({
-        patientId: patient?.id || '',
-        patientName: formData.name,
+      // Create appointment directly in Firestore
+      const appointmentsRef = collection(db, 'appointments');
+      const appointmentData = {
+        patientId: patientId,
+        patientName: patientName,
         date: format(selectedDate, 'yyyy-MM-dd'),
         time: selectedTime,
         duration: consultationType?.duration || 60,
         status: 'agendado',
         type: consultationType?.label || 'Sessão',
         notes: formData.notes || 'Agendado online pelo paciente',
-      });
+        createdAt: new Date().toISOString().split('T')[0],
+        reminderSent1h: false,
+        reminderSent24h: false,
+      };
+      
+      await addDoc(appointmentsRef, appointmentData);
       
       setBookingComplete(true);
       setStep('confirmation');
