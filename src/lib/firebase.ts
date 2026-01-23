@@ -10,6 +10,13 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
+// Debug: Log environment variables (remove in production)
+console.log('Firebase Config Check:', {
+  hasApiKey: !!import.meta.env.VITE_FIREBASE_API_KEY,
+  hasProjectId: !!import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  hasAppId: !!import.meta.env.VITE_FIREBASE_APP_ID,
+});
+
 // Check if Firebase is properly configured
 export const isFirebaseConfigured = !!(
   import.meta.env.VITE_FIREBASE_API_KEY &&
