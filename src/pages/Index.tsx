@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, UserCheck, UserX, TrendingUp, DollarSign, AlertCircle, Calendar } from 'lucide-react';
+import { Users, UserCheck, UserX, TrendingUp, DollarSign, AlertCircle, ArrowUpRight } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { StatCard } from '@/components/dashboard/StatCard';
@@ -28,11 +28,9 @@ const Index = () => {
     }).format(value);
   };
 
-  // Calculate patient stats
   const activePatients = patients.filter(p => p.status === 'ativo').length;
   const inactivePatients = patients.filter(p => p.status === 'inativo').length;
   
-  // Calculate new patients (last 30 days)
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
   const newPatients = patients.filter(p => new Date(p.createdAt) >= thirtyDaysAgo).length;
@@ -41,27 +39,27 @@ const Index = () => {
     <MainLayout>
       <Header 
         title="Dashboard" 
-        subtitle="Visão geral do seu consultório terapêutico"
+        subtitle="Visão geral do seu consultório"
         onNewAppointment={() => setAppointmentDialogOpen(true)}
       />
 
-      {/* Patient Stats Grid */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Total de Pacientes"
           value={stats.totalPatients}
-          subtitle="Pacientes cadastrados"
+          subtitle="Cadastrados"
           icon={Users}
-          iconBgColor="bg-primary"
-          iconColor="text-primary-foreground"
+          iconBgColor="bg-primary/10"
+          iconColor="text-primary"
         />
         <StatCard
           title="Pacientes Ativos"
           value={activePatients}
           subtitle="Em tratamento"
           icon={UserCheck}
-          iconBgColor="bg-success"
-          iconColor="text-success-foreground"
+          iconBgColor="bg-success/10"
+          iconColor="text-success"
         />
         <StatCard
           title="Pacientes Inativos"
@@ -76,70 +74,67 @@ const Index = () => {
           value={newPatients}
           subtitle="Cadastros recentes"
           icon={TrendingUp}
-          iconBgColor="bg-accent"
-          iconColor="text-accent-foreground"
+          iconBgColor="bg-accent/10"
+          iconColor="text-accent"
           trend={newPatients > 0 ? { value: newPatients * 10, isPositive: true } : undefined}
         />
       </div>
 
-      {/* Financial Summary */}
+      {/* Financial Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div className="bg-card border border-border/50 rounded-2xl p-5 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-11 w-11 rounded-xl bg-success flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-success-foreground" />
+        <div className="stat-card group">
+          <div className="flex items-center justify-between mb-4">
+            <div className="h-10 w-10 rounded-xl bg-success/10 flex items-center justify-center">
+              <TrendingUp className="h-5 w-5 text-success" />
             </div>
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-success/10 text-success">Este mês</span>
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-success/10 text-success">
+              Este mês
+            </span>
           </div>
           <p className="text-sm text-muted-foreground mb-1">Receitas</p>
-          <p className="text-2xl font-bold text-success">{formatCurrency(stats.monthRevenue)}</p>
+          <div className="flex items-baseline gap-2">
+            <p className="text-2xl font-bold text-success tracking-tight">{formatCurrency(stats.monthRevenue)}</p>
+            <ArrowUpRight className="h-4 w-4 text-success" />
+          </div>
         </div>
 
-        <div className="bg-card border border-border/50 rounded-2xl p-5 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-11 w-11 rounded-xl bg-primary flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-primary-foreground" />
+        <div className="stat-card group">
+          <div className="flex items-center justify-between mb-4">
+            <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-primary" />
             </div>
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">Lucro</span>
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-primary/10 text-primary">
+              Lucro
+            </span>
           </div>
           <p className="text-sm text-muted-foreground mb-1">Saldo do Mês</p>
-          <p className="text-2xl font-bold text-primary">{formatCurrency(stats.monthRevenue - stats.monthExpenses)}</p>
+          <p className="text-2xl font-bold text-primary tracking-tight">{formatCurrency(stats.monthRevenue - stats.monthExpenses)}</p>
         </div>
 
-        <div className="bg-card border border-border/50 rounded-2xl p-5 hover:shadow-lg transition-all duration-300">
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-11 w-11 rounded-xl bg-warning flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 text-warning-foreground" />
+        <div className="stat-card group">
+          <div className="flex items-center justify-between mb-4">
+            <div className="h-10 w-10 rounded-xl bg-warning/10 flex items-center justify-center">
+              <AlertCircle className="h-5 w-5 text-warning" />
             </div>
-            <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-warning/10 text-warning">Pendente</span>
+            <span className="px-2 py-0.5 rounded-md text-[11px] font-medium bg-warning/10 text-warning">
+              Pendente
+            </span>
           </div>
           <p className="text-sm text-muted-foreground mb-1">A Receber</p>
-          <p className="text-2xl font-bold text-warning">{formatCurrency(stats.pendingPayments)}</p>
+          <p className="text-2xl font-bold text-warning tracking-tight">{formatCurrency(stats.pendingPayments)}</p>
         </div>
       </div>
 
-      {/* Main Content Grid - 3 Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Quick Actions */}
-        <div>
-          <QuickActions 
-            onNewAppointment={() => setAppointmentDialogOpen(true)} 
-            hasPatients={patients.length > 0}
-          />
-        </div>
-
-        {/* Recent Patients */}
-        <div>
-          <RecentPatients patients={patients} />
-        </div>
-
-        {/* Upcoming Sessions */}
-        <div>
-          <UpcomingSessions appointments={appointments} />
-        </div>
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <QuickActions 
+          onNewAppointment={() => setAppointmentDialogOpen(true)} 
+          hasPatients={patients.length > 0}
+        />
+        <RecentPatients patients={patients} />
+        <UpcomingSessions appointments={appointments} />
       </div>
 
-      {/* Dialogs */}
       <AppointmentFormDialog
         open={appointmentDialogOpen}
         onOpenChange={setAppointmentDialogOpen}

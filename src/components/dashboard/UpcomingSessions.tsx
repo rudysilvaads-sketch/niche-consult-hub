@@ -14,55 +14,54 @@ export function UpcomingSessions({ appointments }: UpcomingSessionsProps) {
     .slice(0, 4);
 
   return (
-    <div className="bg-card border border-border/50 rounded-2xl p-6 h-full">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" />
-          <h3 className="font-display text-lg font-semibold text-foreground">
-            Próximas Sessões
-          </h3>
-        </div>
+    <div className="glass-card p-5 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
+          <Calendar className="h-4 w-4 text-primary" />
+          Próximas Sessões
+        </h3>
         <Link to="/agenda">
-          <Button variant="ghost" size="sm" className="text-primary hover:text-primary/80 text-sm gap-1">
-            Ver todas <ArrowRight className="h-3.5 w-3.5" />
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground gap-1 group">
+            Ver todas
+            <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
           </Button>
         </Link>
       </div>
 
       {upcomingSessions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="h-16 w-16 rounded-full bg-muted/50 flex items-center justify-center mb-4">
-            <Clock className="h-8 w-8 text-muted-foreground/50" />
+        <div className="flex-1 flex flex-col items-center justify-center py-8 text-center">
+          <div className="h-14 w-14 rounded-2xl bg-secondary flex items-center justify-center mb-4">
+            <Clock className="h-6 w-6 text-muted-foreground" />
           </div>
-          <p className="text-muted-foreground">Nenhuma sessão agendada</p>
+          <p className="text-sm text-muted-foreground">Nenhuma sessão agendada</p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-2 flex-1">
           {upcomingSessions.map((session, index) => (
             <div
               key={session.id}
-              className="flex items-center gap-3 p-3 rounded-xl bg-secondary/20 hover:bg-secondary/40 transition-colors animate-slide-up"
+              className="list-item bg-secondary/30 animate-slide-up"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <div className="flex flex-col items-center justify-center h-12 w-12 rounded-xl bg-primary/10 shrink-0">
-                <span className="text-xs font-medium text-primary">
+              <div className="flex flex-col items-center justify-center h-11 w-11 rounded-lg bg-primary/10 shrink-0">
+                <span className="text-sm font-bold text-primary leading-none">
                   {new Date(session.date).toLocaleDateString('pt-BR', { day: '2-digit' })}
                 </span>
-                <span className="text-[10px] text-primary/80 uppercase">
+                <span className="text-[10px] text-primary/80 uppercase font-medium">
                   {new Date(session.date).toLocaleDateString('pt-BR', { month: 'short' })}
                 </span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground text-sm truncate">{session.patientName}</p>
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <p className="text-sm font-medium text-foreground truncate">{session.patientName}</p>
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Clock className="h-3 w-3" />
                   <span>{session.time}</span>
-                  <span>•</span>
+                  <span className="text-muted-foreground/50">•</span>
                   <span>{session.duration}min</span>
                 </div>
               </div>
               <div className={cn(
-                "px-2 py-1 rounded-full text-xs font-medium",
+                "px-2 py-1 rounded-md text-[11px] font-medium",
                 session.status === 'confirmado' 
                   ? "bg-success/10 text-success" 
                   : "bg-warning/10 text-warning"

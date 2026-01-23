@@ -1,16 +1,37 @@
-import logoImage from '@/assets/logo.png';
+import { Sparkles } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface BrandingProps {
-  variant?: 'full' | 'icon' | 'text';
+  variant?: 'icon' | 'text' | 'full';
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
 const sizeClasses = {
-  sm: { logo: 'h-8', text: 'text-lg', icon: 'h-8 w-8' },
-  md: { logo: 'h-12', text: 'text-xl', icon: 'h-12 w-12' },
-  lg: { logo: 'h-16', text: 'text-2xl', icon: 'h-16 w-16' },
-  xl: { logo: 'h-24', text: 'text-3xl', icon: 'h-24 w-24' },
+  sm: {
+    icon: 'h-8 w-8',
+    iconInner: 'h-4 w-4',
+    text: 'text-sm',
+    subtext: 'text-[10px]',
+  },
+  md: {
+    icon: 'h-10 w-10',
+    iconInner: 'h-5 w-5',
+    text: 'text-base',
+    subtext: 'text-xs',
+  },
+  lg: {
+    icon: 'h-14 w-14',
+    iconInner: 'h-7 w-7',
+    text: 'text-xl',
+    subtext: 'text-sm',
+  },
+  xl: {
+    icon: 'h-20 w-20',
+    iconInner: 'h-10 w-10',
+    text: 'text-2xl',
+    subtext: 'text-base',
+  },
 };
 
 export function Branding({ variant = 'full', size = 'md', className = '' }: BrandingProps) {
@@ -18,19 +39,19 @@ export function Branding({ variant = 'full', size = 'md', className = '' }: Bran
 
   if (variant === 'icon') {
     return (
-      <div className={`flex items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent ${sizes.icon} ${className}`}>
-        <span className="text-primary-foreground font-bold text-lg">ET</span>
+      <div className={cn('rounded-xl bg-primary/10 flex items-center justify-center', sizes.icon, className)}>
+        <Sparkles className={cn('text-primary', sizes.iconInner)} />
       </div>
     );
   }
 
   if (variant === 'text') {
     return (
-      <div className={`flex flex-col ${className}`}>
-        <span className={`font-display font-bold text-foreground ${sizes.text}`}>
+      <div className={cn('flex flex-col', className)}>
+        <span className={cn('font-display font-bold text-foreground', sizes.text)}>
           Espaço Terapêutico
         </span>
-        <span className="text-xs text-muted-foreground">
+        <span className={cn('text-muted-foreground', sizes.subtext)}>
           Gestão para Terapeutas e Psicólogos
         </span>
       </div>
@@ -38,8 +59,14 @@ export function Branding({ variant = 'full', size = 'md', className = '' }: Bran
   }
 
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <img src={logoImage} alt="Espaço Terapêutico" className={sizes.logo} />
+    <div className={cn('flex items-center gap-3', className)}>
+      <div className={cn('rounded-xl bg-primary/10 flex items-center justify-center', sizes.icon)}>
+        <Sparkles className={cn('text-primary', sizes.iconInner)} />
+      </div>
+      <div>
+        <p className={cn('font-semibold text-foreground', sizes.text)}>Espaço</p>
+        <p className={cn('text-muted-foreground -mt-0.5', sizes.subtext)}>Terapêutico</p>
+      </div>
     </div>
   );
 }
@@ -50,36 +77,38 @@ export const BRAND = {
   tagline: 'Gestão para Terapeutas e Psicólogos',
   email: 'contato@espacoterapeutico.com.br',
   website: 'www.espacoterapeutico.com.br',
-  primaryColor: '#5b21b6', // Deep Indigo Purple
-  accentColor: '#a78bfa', // Soft Lilac
+  primaryColor: '#7c3aed',
+  accentColor: '#a78bfa',
 };
 
 // Email template helper
 export function getEmailTemplate(type: 'welcome' | 'appointment' | 'reminder' | 'session') {
   const baseStyles = `
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #1e1b4b;
+    background-color: #0f0e17;
     padding: 40px 20px;
   `;
 
   const headerStyles = `
-    background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a78bfa 100%);
+    background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
     padding: 30px;
     text-align: center;
     border-radius: 16px 16px 0 0;
   `;
 
   const bodyStyles = `
-    background-color: #ffffff;
+    background-color: #1a1825;
     padding: 40px 30px;
     border-radius: 0 0 16px 16px;
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-top: none;
+    color: #fafafa;
   `;
 
   const buttonStyles = `
     display: inline-block;
-    background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
-    color: #1e1b4b;
+    background: linear-gradient(135deg, #7c3aed 0%, #a78bfa 100%);
+    color: #ffffff;
     padding: 14px 32px;
     text-decoration: none;
     border-radius: 10px;
@@ -90,7 +119,7 @@ export function getEmailTemplate(type: 'welcome' | 'appointment' | 'reminder' | 
   const footerStyles = `
     text-align: center;
     padding: 20px;
-    color: rgba(255,255,255,0.6);
+    color: rgba(255,255,255,0.5);
     font-size: 12px;
   `;
 
@@ -102,8 +131,8 @@ export function getEmailTemplate(type: 'welcome' | 'appointment' | 'reminder' | 
     footerStyles,
     logoHtml: `
       <div style="text-align: center; margin-bottom: 15px;">
-        <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px;">
-          <span style="color: white; font-size: 24px; font-weight: bold;">ET</span>
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 12px;">
+          <span style="color: white; font-size: 24px;">✨</span>
         </div>
       </div>
       <h1 style="color: #ffffff; margin: 0; font-size: 24px; font-weight: 700;">
@@ -114,11 +143,11 @@ export function getEmailTemplate(type: 'welcome' | 'appointment' | 'reminder' | 
       </p>
     `,
     footerHtml: `
-      <p style="margin: 0 0 10px; color: rgba(255,255,255,0.7);">
+      <p style="margin: 0 0 10px; color: rgba(255,255,255,0.6);">
         ${BRAND.name}<br>
         <a href="mailto:${BRAND.email}" style="color: #a78bfa;">${BRAND.email}</a>
       </p>
-      <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 11px;">
+      <p style="margin: 0; color: rgba(255,255,255,0.4); font-size: 11px;">
         Este é um email automático. Por favor, não responda.
       </p>
     `,
