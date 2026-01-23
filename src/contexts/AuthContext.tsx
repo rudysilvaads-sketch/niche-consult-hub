@@ -81,11 +81,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: any) {
       const errorMessages: Record<string, string> = {
         'auth/email-already-in-use': 'Este email já está cadastrado',
-        'auth/invalid-email': 'Email inválido',
+        'auth/invalid-email': 'Email inválido. Verifique se digitou corretamente.',
         'auth/operation-not-allowed': 'Operação não permitida',
         'auth/weak-password': 'Senha muito fraca. Use pelo menos 6 caracteres.',
+        'auth/network-request-failed': 'Erro de conexão. Verifique sua internet.',
+        'auth/too-many-requests': 'Muitas tentativas. Aguarde alguns minutos.',
+        'auth/invalid-credential': 'Credenciais inválidas',
       };
-      setError(errorMessages[err.code] || 'Erro ao criar conta');
+      setError(errorMessages[err.code] || `Erro ao criar conta: ${err.message || 'Tente novamente.'}`);
       throw err;
     }
   };
