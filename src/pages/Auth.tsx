@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
+import { Branding } from '@/components/branding/Branding';
 
 const loginSchema = z.object({
   email: z.string().trim().email('Email inválido'),
@@ -152,11 +153,8 @@ const Auth = () => {
         <div className="w-full max-w-md">
           {/* Logo/Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-primary-foreground">ET</span>
-            </div>
-            <h1 className="text-2xl font-bold text-foreground">Espaço Terapêutico</h1>
-            <p className="text-sm text-muted-foreground mt-1">Gestão para Terapeutas e Psicólogos</p>
+            <Branding variant="full" size="lg" className="justify-center mb-4" />
+            <p className="text-sm text-muted-foreground mt-2">Gestão para Terapeutas e Psicólogos</p>
           </div>
 
           <Card className="card-elevated">
@@ -250,15 +248,12 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-muted/30 p-4">
-      <div className="w-full max-w-md">
-        {/* Logo/Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl font-bold text-primary-foreground">ET</span>
+        <div className="w-full max-w-md">
+          {/* Logo/Header */}
+          <div className="text-center mb-8">
+            <Branding variant="full" size="lg" className="justify-center mb-4" />
+            <p className="text-sm text-muted-foreground mt-2">Gestão para Terapeutas e Psicólogos</p>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Espaço Terapêutico</h1>
-          <p className="text-sm text-muted-foreground mt-1">Gestão para Terapeutas e Psicólogos</p>
-        </div>
 
         <Card className="card-elevated">
           <CardHeader className="text-center pb-4">

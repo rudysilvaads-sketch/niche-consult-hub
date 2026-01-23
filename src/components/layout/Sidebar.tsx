@@ -8,7 +8,6 @@ import {
   Settings,
   ChevronLeft,
   ChevronRight,
-  Stethoscope,
   DollarSign,
   FileCheck,
   BarChart3,
@@ -28,6 +27,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import logoImage from '@/assets/logo.png';
 
 const menuItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
@@ -70,18 +70,8 @@ export function Sidebar() {
         )}
       >
         {/* Logo */}
-        <div className="flex items-center gap-3 px-6 py-6 border-b border-sidebar-border">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Stethoscope className="h-5 w-5" />
-          </div>
-          {!collapsed && (
-            <div className="animate-fade-in">
-              <h1 className="font-display text-lg font-bold text-sidebar-foreground">
-                Espaço Terapêutico
-              </h1>
-              <p className="text-xs text-muted-foreground">Gestão de Consultas</p>
-            </div>
-          )}
+        <div className="flex items-center gap-3 px-4 py-5 border-b border-sidebar-border">
+          <img src={logoImage} alt="Espaço Terapêutico" className={cn('transition-all', collapsed ? 'h-10' : 'h-12')} />
         </div>
 
         {/* Navigation */}
