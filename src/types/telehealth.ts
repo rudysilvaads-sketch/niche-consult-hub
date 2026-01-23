@@ -50,6 +50,11 @@ export interface AIAnalysis {
   riskIndicators?: string[];
   therapeuticNotes?: string;
   createdAt: string;
+  // Patient sharing
+  isSharedWithPatient?: boolean;
+  shareToken?: string;
+  patientSummary?: string; // Simplified summary for patient
+  sharedAt?: string;
 }
 
 // WebRTC Signaling Types
