@@ -9,6 +9,7 @@ import { ProtectedRoute } from "./components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Agenda from "./pages/Agenda";
 import Agendar from "./pages/Agendar";
+import Cadastro from "./pages/Cadastro";
 import Auth from "./pages/Auth";
 import Pacientes from "./pages/Pacientes";
 import Prontuarios from "./pages/Prontuarios";
@@ -16,6 +17,7 @@ import Financeiro from "./pages/Financeiro";
 import Documentos from "./pages/Documentos";
 import Relatorios from "./pages/Relatorios";
 import Configuracoes from "./pages/Configuracoes";
+import VideoRoom from "./pages/VideoRoom";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -32,6 +34,8 @@ const App = () => (
               {/* Public routes */}
               <Route path="/auth" element={<Auth />} />
               <Route path="/agendar" element={<Agendar />} />
+              <Route path="/cadastro/:token" element={<Cadastro />} />
+              <Route path="/sala/:sessionId" element={<VideoRoom />} />
               
               {/* Protected routes */}
               <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />

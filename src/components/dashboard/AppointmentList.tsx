@@ -1,4 +1,4 @@
-import { Clock, User, MoreVertical } from 'lucide-react';
+import { Clock, User, MoreVertical, Video } from 'lucide-react';
 import { Appointment, STATUS_LABELS, AppointmentStatus } from '@/types';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,7 @@ interface AppointmentListProps {
   onEdit?: (appointment: Appointment) => void;
   onUpdateStatus?: (id: string, status: AppointmentStatus) => void;
   onDelete?: (id: string) => void;
+  onStartSession?: (appointment: Appointment) => void;
 }
 
 const statusColors: Record<AppointmentStatus, string> = {
@@ -34,6 +35,7 @@ export function AppointmentList({
   onEdit,
   onUpdateStatus,
   onDelete,
+  onStartSession,
 }: AppointmentListProps) {
   return (
     <div className="card-elevated p-6">
@@ -85,6 +87,19 @@ export function AppointmentList({
                 >
                   {STATUS_LABELS[appointment.status]}
                 </span>
+
+                {/* Start Session Button */}
+                {onStartSession && (appointment.status === 'confirmado' || appointment.status === 'agendado') && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onStartSession(appointment)}
+                    className="gap-1.5 text-primary border-primary/30 hover:bg-primary/10"
+                  >
+                    <Video className="h-4 w-4" />
+                    Iniciar
+                  </Button>
+                )}
                 
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -96,6 +111,12 @@ export function AppointmentList({
                     {onEdit && (
                       <DropdownMenuItem onClick={() => onEdit(appointment)}>
                         Editar
+                      </DropdownMenuItem>
+                    )}
+                    {onStartSession && (
+                      <DropdownMenuItem onClick={() => onStartSession(appointment)}>
+                        <Video className="h-4 w-4 mr-2" />
+                        Iniciar sessão online
                       </DropdownMenuItem>
                     )}
                     {onUpdateStatus && (
