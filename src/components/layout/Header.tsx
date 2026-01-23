@@ -1,6 +1,7 @@
 import { Bell, Search, Plus, Command, Moon, Sun } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useTheme } from '@/contexts/ThemeContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { motion } from 'framer-motion';
 
 interface HeaderProps {
@@ -11,23 +12,24 @@ interface HeaderProps {
 
 export function Header({ title, subtitle, onNewAppointment }: HeaderProps) {
   const { resolvedTheme, setTheme } = useTheme();
+  const isMobile = useIsMobile();
 
   const toggleTheme = () => {
     setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
   };
 
   return (
-    <header className="flex items-center justify-between mb-8">
+    <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 sm:mb-8">
       <div className="space-y-0.5">
-        <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">{title}</h1>
+        <h1 className="font-display text-xl sm:text-2xl font-bold text-foreground tracking-tight">{title}</h1>
         {subtitle && (
-          <p className="text-sm text-muted-foreground">{subtitle}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
         )}
       </div>
 
       <div className="flex items-center gap-2">
-        {/* Search */}
-        <div className="relative hidden md:block">
+        {/* Search - Hidden on mobile */}
+        <div className="relative hidden lg:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             placeholder="Buscar..."
@@ -69,7 +71,7 @@ export function Header({ title, subtitle, onNewAppointment }: HeaderProps) {
 
         {/* New Appointment */}
         {onNewAppointment && (
-          <Button onClick={onNewAppointment} className="btn-gradient h-9 px-4 gap-2 rounded-lg">
+          <Button onClick={onNewAppointment} className="btn-gradient h-9 px-3 sm:px-4 gap-2 rounded-lg">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline text-sm font-medium">Nova Consulta</span>
           </Button>
