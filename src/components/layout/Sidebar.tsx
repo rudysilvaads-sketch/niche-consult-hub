@@ -77,7 +77,7 @@ export function Sidebar() {
           {!collapsed && (
             <div className="animate-fade-in">
               <h1 className="font-display text-lg font-bold text-sidebar-foreground">
-                ConsultaPro
+                Espaço Terapêutico
               </h1>
               <p className="text-xs text-muted-foreground">Gestão de Consultas</p>
             </div>

@@ -29,9 +29,9 @@ const TIME_SLOTS = [
 ];
 
 const CONSULTATION_TYPES = [
-  { id: 'primeira', label: 'Primeira Consulta', duration: 60 },
-  { id: 'retorno', label: 'Retorno', duration: 45 },
-  { id: 'avaliacao', label: 'Avaliação', duration: 30 },
+  { id: 'primeira', label: 'Primeira Sessão', duration: 60 },
+  { id: 'retorno', label: 'Sessão de Acompanhamento', duration: 50 },
+  { id: 'avaliacao', label: 'Avaliação Inicial', duration: 90 },
 ];
 
 type Step = 'type' | 'date' | 'time' | 'form' | 'confirmation';
@@ -193,12 +193,12 @@ const Agendar = () => {
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl font-bold text-foreground">Agendar Consulta</h1>
-              <p className="text-sm text-muted-foreground">Reserve seu horário online</p>
+              <h1 className="text-xl font-bold text-foreground">Espaço Terapêutico Online</h1>
+              <p className="text-sm text-muted-foreground">Agende sua sessão terapêutica</p>
             </div>
             <Badge variant="outline" className="gap-1">
               <Calendar className="h-3 w-3" />
-              Online
+              Agendamento Online
             </Badge>
           </div>
         </div>

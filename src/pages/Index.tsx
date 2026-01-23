@@ -40,8 +40,8 @@ const Index = () => {
   return (
     <MainLayout>
       <Header 
-        title="Dashboard do Consultório" 
-        subtitle="Visão geral e estatísticas do seu consultório"
+        title="Dashboard" 
+        subtitle="Visão geral do seu consultório terapêutico"
         onNewAppointment={() => setAppointmentDialogOpen(true)}
       />
 

@@ -153,10 +153,10 @@ const Auth = () => {
           {/* Logo/Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl font-bold text-primary-foreground">CP</span>
+              <span className="text-2xl font-bold text-primary-foreground">ET</span>
             </div>
-            <h1 className="text-2xl font-bold text-foreground">ConsultaPro</h1>
-            <p className="text-sm text-muted-foreground mt-1">Gestão de Consultas</p>
+            <h1 className="text-2xl font-bold text-foreground">Espaço Terapêutico</h1>
+            <p className="text-sm text-muted-foreground mt-1">Gestão para Terapeutas e Psicólogos</p>
           </div>
 
           <Card className="card-elevated">
@@ -254,10 +254,10 @@ const Auth = () => {
         {/* Logo/Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mx-auto mb-4">
-            <span className="text-2xl font-bold text-primary-foreground">CP</span>
+            <span className="text-2xl font-bold text-primary-foreground">ET</span>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">ConsultaPro</h1>
-          <p className="text-sm text-muted-foreground mt-1">Gestão de Consultas</p>
+          <h1 className="text-2xl font-bold text-foreground">Espaço Terapêutico</h1>
+          <p className="text-sm text-muted-foreground mt-1">Gestão para Terapeutas e Psicólogos</p>
         </div>
 
         <Card className="card-elevated">
