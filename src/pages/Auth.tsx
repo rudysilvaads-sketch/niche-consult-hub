@@ -175,27 +175,172 @@ const Auth = () => {
       {/* Overlay gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-primary/75 to-primary/65" />
       
-      {/* Decorative Background Elements */}
-      <div className="absolute inset-0">
-        {/* Organic shapes */}
-        <div className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl translate-x-1/4 translate-y-1/4" />
+      {/* Decorative Background Elements with Parallax */}
+      <div className="absolute inset-0 pointer-events-none">
+        {/* Organic shapes - Slow parallax (background layer) */}
+        <motion.div 
+          className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2"
+          animate={{
+            x: mousePosition.x * 0.3,
+            y: mousePosition.y * 0.3,
+          }}
+          transition={{ type: "spring", stiffness: 30, damping: 40 }}
+        />
+        <motion.div 
+          className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl translate-x-1/4 translate-y-1/4"
+          animate={{
+            x: mousePosition.x * 0.4,
+            y: mousePosition.y * 0.4,
+          }}
+          transition={{ type: "spring", stiffness: 25, damping: 35 }}
+        />
+        <motion.div 
+          className="absolute top-1/2 left-1/4 w-72 h-72 bg-white/3 rounded-full blur-2xl"
+          animate={{
+            x: mousePosition.x * 0.5,
+            y: mousePosition.y * 0.5,
+          }}
+          transition={{ type: "spring", stiffness: 35, damping: 30 }}
+        />
         
-        {/* Floating elements */}
+        {/* Medium layer - Geometric shapes */}
         <motion.div 
-          className="absolute top-20 right-20 w-20 h-20 border border-white/10 rounded-2xl backdrop-blur-sm"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+          className="absolute top-20 right-20 w-24 h-24 border border-white/15 rounded-2xl backdrop-blur-sm"
+          animate={{ 
+            rotate: 360,
+            x: mousePosition.x * 0.8,
+            y: mousePosition.y * 0.8,
+          }}
+          transition={{ 
+            rotate: { duration: 30, repeat: Infinity, ease: "linear" },
+            x: { type: "spring", stiffness: 60, damping: 25 },
+            y: { type: "spring", stiffness: 60, damping: 25 },
+          }}
         />
         <motion.div 
-          className="absolute bottom-32 left-20 w-16 h-16 border border-white/10 rounded-full backdrop-blur-sm"
-          animate={{ y: [-10, 10, -10] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute bottom-32 left-16 w-20 h-20 border border-white/10 rounded-full backdrop-blur-sm"
+          animate={{ 
+            y: [-10, 10, -10],
+            x: mousePosition.x * 0.7,
+          }}
+          transition={{ 
+            y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+            x: { type: "spring", stiffness: 50, damping: 30 },
+          }}
         />
         <motion.div 
-          className="absolute top-1/3 right-1/4 w-3 h-3 bg-white/20 rounded-full"
-          animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.5, 0.2] }}
-          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-1/2 right-12 w-14 h-14 border border-white/8 rounded-xl rotate-45"
+          animate={{ 
+            x: mousePosition.x * 1.0,
+            y: mousePosition.y * 1.0,
+            rotate: 45 + mousePosition.x * 2,
+          }}
+          transition={{ type: "spring", stiffness: 70, damping: 20 }}
+        />
+        <motion.div 
+          className="absolute bottom-1/4 right-1/3 w-16 h-16 border border-white/10 rounded-full"
+          animate={{ 
+            scale: [1, 1.1, 1],
+            x: mousePosition.x * 0.6,
+            y: mousePosition.y * 0.6,
+          }}
+          transition={{ 
+            scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+            x: { type: "spring", stiffness: 40, damping: 30 },
+            y: { type: "spring", stiffness: 40, damping: 30 },
+          }}
+        />
+        
+        {/* Fast layer - Small floating dots */}
+        <motion.div 
+          className="absolute top-1/3 right-1/4 w-3 h-3 bg-white/30 rounded-full"
+          animate={{ 
+            scale: [1, 1.5, 1], 
+            opacity: [0.3, 0.6, 0.3],
+            x: mousePosition.x * 1.5,
+            y: mousePosition.y * 1.5,
+          }}
+          transition={{ 
+            scale: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+            opacity: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+            x: { type: "spring", stiffness: 100, damping: 15 },
+            y: { type: "spring", stiffness: 100, damping: 15 },
+          }}
+        />
+        <motion.div 
+          className="absolute top-1/4 left-1/3 w-2 h-2 bg-white/40 rounded-full"
+          animate={{ 
+            scale: [1, 2, 1], 
+            opacity: [0.4, 0.7, 0.4],
+            x: mousePosition.x * 1.8,
+            y: mousePosition.y * 1.8,
+          }}
+          transition={{ 
+            scale: { duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
+            opacity: { duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
+            x: { type: "spring", stiffness: 120, damping: 12 },
+            y: { type: "spring", stiffness: 120, damping: 12 },
+          }}
+        />
+        <motion.div 
+          className="absolute bottom-1/3 left-1/4 w-2.5 h-2.5 bg-white/25 rounded-full"
+          animate={{ 
+            x: mousePosition.x * 2.0,
+            y: mousePosition.y * 2.0,
+          }}
+          transition={{ type: "spring", stiffness: 150, damping: 10 }}
+        />
+        <motion.div 
+          className="absolute top-2/3 right-1/3 w-1.5 h-1.5 bg-white/35 rounded-full"
+          animate={{ 
+            x: mousePosition.x * 2.2,
+            y: mousePosition.y * 2.2,
+            opacity: [0.35, 0.6, 0.35],
+          }}
+          transition={{ 
+            x: { type: "spring", stiffness: 180, damping: 8 },
+            y: { type: "spring", stiffness: 180, damping: 8 },
+            opacity: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+          }}
+        />
+        <motion.div 
+          className="absolute top-16 left-1/2 w-4 h-4 bg-white/15 rounded-full blur-sm"
+          animate={{ 
+            x: mousePosition.x * 1.3,
+            y: mousePosition.y * 1.3,
+          }}
+          transition={{ type: "spring", stiffness: 80, damping: 18 }}
+        />
+        <motion.div 
+          className="absolute bottom-20 right-1/4 w-3 h-3 bg-white/20 rounded-full"
+          animate={{ 
+            x: mousePosition.x * 1.6,
+            y: mousePosition.y * 1.6,
+            scale: [1, 1.3, 1],
+          }}
+          transition={{ 
+            x: { type: "spring", stiffness: 110, damping: 14 },
+            y: { type: "spring", stiffness: 110, damping: 14 },
+            scale: { duration: 3.5, repeat: Infinity, ease: "easeInOut" },
+          }}
+        />
+        
+        {/* Accent lines */}
+        <motion.div 
+          className="absolute top-1/4 right-16 w-px h-32 bg-gradient-to-b from-transparent via-white/20 to-transparent"
+          animate={{ 
+            x: mousePosition.x * 0.9,
+            y: mousePosition.y * 0.9,
+          }}
+          transition={{ type: "spring", stiffness: 55, damping: 25 }}
+        />
+        <motion.div 
+          className="absolute bottom-1/3 left-24 w-24 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent"
+          animate={{ 
+            x: mousePosition.x * 1.1,
+            y: mousePosition.y * 1.1,
+          }}
+          transition={{ type: "spring", stiffness: 65, damping: 22 }}
         />
       </div>
       
