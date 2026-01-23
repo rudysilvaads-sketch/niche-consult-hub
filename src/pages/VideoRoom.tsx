@@ -133,7 +133,7 @@ const VideoRoom = () => {
   // Generate patient link
   const getPatientLink = () => {
     const baseUrl = window.location.origin;
-    return `${baseUrl}/video/${sessionId}?role=patient`;
+    return `${baseUrl}/sala/${sessionId}?role=patient`;
   };
 
   const copyPatientLink = async () => {
