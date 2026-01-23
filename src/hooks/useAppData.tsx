@@ -190,6 +190,9 @@ export function useAppData() {
       paymentStatus: appointment.paymentStatus,
       paymentMethod: appointment.paymentMethod,
       createdAt: new Date().toISOString().split('T')[0],
+      // Initialize reminder tracking fields
+      reminderSent1h: false,
+      reminderSent24h: false,
     };
 
     if (isFirebaseConfigured && db) {
