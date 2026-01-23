@@ -1,12 +1,45 @@
 export type ProfessionalCategory = 
-  | 'advogado'
   | 'terapeuta'
   | 'sexologo'
-  | 'medico'
-  | 'dentista'
   | 'psicologo'
-  | 'nutricionista'
-  | 'fisioterapeuta';
+  | 'psicanalista'
+  | 'constelador';
+
+export type TherapyApproach = 
+  | 'tcc'
+  | 'psicanalise'
+  | 'gestalt'
+  | 'humanista'
+  | 'sistemica'
+  | 'integrativa'
+  | 'constelacao'
+  | 'sexologia_clinica'
+  | 'terapia_casal'
+  | 'outra';
+
+export interface ProfessionalProfile {
+  id: string;
+  userId: string;
+  name: string;
+  category: ProfessionalCategory;
+  email: string;
+  phone: string;
+  photoUrl?: string;
+  bio?: string;
+  registrationNumber?: string; // CRP, CRM, etc.
+  specialty?: string;
+  approaches?: TherapyApproach[];
+  sessionDuration?: number;
+  sessionPrice?: number;
+  clinicName?: string;
+  clinicAddress?: string;
+  clinicCity?: string;
+  clinicState?: string;
+  onlineService?: boolean;
+  inPersonService?: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface Professional {
   id: string;
@@ -142,14 +175,24 @@ export interface DashboardStats {
 }
 
 export const CATEGORY_LABELS: Record<ProfessionalCategory, string> = {
-  advogado: 'Advocacia',
-  terapeuta: 'Terapia',
-  sexologo: 'Sexologia',
-  medico: 'Medicina',
-  dentista: 'Odontologia',
-  psicologo: 'Psicologia',
-  nutricionista: 'Nutrição',
-  fisioterapeuta: 'Fisioterapia',
+  terapeuta: 'Terapeuta',
+  sexologo: 'Sexólogo(a)',
+  psicologo: 'Psicólogo(a)',
+  psicanalista: 'Psicanalista',
+  constelador: 'Constelador(a)',
+};
+
+export const THERAPY_APPROACH_LABELS: Record<TherapyApproach, string> = {
+  tcc: 'Terapia Cognitivo-Comportamental (TCC)',
+  psicanalise: 'Psicanálise',
+  gestalt: 'Gestalt-terapia',
+  humanista: 'Abordagem Humanista',
+  sistemica: 'Terapia Sistêmica',
+  integrativa: 'Abordagem Integrativa',
+  constelacao: 'Constelação Familiar',
+  sexologia_clinica: 'Sexologia Clínica',
+  terapia_casal: 'Terapia de Casal',
+  outra: 'Outra',
 };
 
 export const STATUS_LABELS: Record<AppointmentStatus, string> = {
