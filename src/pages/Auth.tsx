@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { motion } from 'framer-motion';
 import logo from '@/assets/logo.png';
+import authBackground from '@/assets/auth-background.jpg';
 
 const loginSchema = z.object({
   email: z.string().trim().email('Email inválido'),
@@ -150,31 +151,30 @@ const Auth = () => {
 
   // Left Panel with Branding
   const BrandingPanel = () => (
-    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary/80">
+    <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
+      {/* Background Image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${authBackground})` }}
+      />
+      
+      {/* Overlay gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/85 via-primary/75 to-primary/65" />
+      
       {/* Decorative Background Elements */}
       <div className="absolute inset-0">
         {/* Organic shapes */}
         <div className="absolute top-0 left-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl translate-x-1/4 translate-y-1/4" />
-        <div className="absolute top-1/2 left-1/2 w-72 h-72 bg-white/3 rounded-full blur-2xl -translate-x-1/2 -translate-y-1/2" />
-        
-        {/* Grid pattern */}
-        <div 
-          className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
-            backgroundSize: '60px 60px'
-          }}
-        />
         
         {/* Floating elements */}
         <motion.div 
-          className="absolute top-20 right-20 w-20 h-20 border border-white/10 rounded-2xl"
+          className="absolute top-20 right-20 w-20 h-20 border border-white/10 rounded-2xl backdrop-blur-sm"
           animate={{ rotate: 360 }}
           transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
         />
         <motion.div 
-          className="absolute bottom-32 left-20 w-16 h-16 border border-white/10 rounded-full"
+          className="absolute bottom-32 left-20 w-16 h-16 border border-white/10 rounded-full backdrop-blur-sm"
           animate={{ y: [-10, 10, -10] }}
           transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
         />
@@ -182,11 +182,6 @@ const Auth = () => {
           className="absolute top-1/3 right-1/4 w-3 h-3 bg-white/20 rounded-full"
           animate={{ scale: [1, 1.5, 1], opacity: [0.2, 0.5, 0.2] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div 
-          className="absolute bottom-1/4 left-1/3 w-2 h-2 bg-white/30 rounded-full"
-          animate={{ scale: [1, 2, 1], opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
         />
       </div>
       
