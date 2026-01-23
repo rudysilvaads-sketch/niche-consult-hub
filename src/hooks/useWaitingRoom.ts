@@ -20,6 +20,16 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
   const [isDenied, setIsDenied] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Store participant name in a ref to track changes
+  const [currentParticipantName, setCurrentParticipantName] = useState(participantName || '');
+
+  // Update current participant name when prop changes
+  useEffect(() => {
+    if (participantName) {
+      setCurrentParticipantName(participantName);
+    }
+  }, [participantName]);
+
   // Subscribe to waiting room state
   useEffect(() => {
     if (!isFirebaseConfigured || !db || !sessionId) {
@@ -34,16 +44,26 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
       
       if (data) {
         const waiting = data.waitingParticipants || [];
-        const admitted = data.admittedParticipants || [];
-        const denied = data.deniedParticipants || [];
+        const admitted: string[] = data.admittedParticipants || [];
+        const denied: string[] = data.deniedParticipants || [];
 
         setWaitingParticipants(waiting);
 
         // Check if current participant was admitted or denied
-        if (!isHost && participantName) {
-          const participantId = `${participantName}-${sessionId}`;
-          setIsAdmitted(admitted.includes(participantId));
-          setIsDenied(denied.includes(participantId));
+        if (!isHost && currentParticipantName) {
+          const participantId = `${currentParticipantName}-${sessionId}`;
+          const wasAdmitted = admitted.includes(participantId);
+          const wasDenied = denied.includes(participantId);
+          
+          console.log('🔍 Checking admission status:', { 
+            participantId, 
+            admitted, 
+            wasAdmitted, 
+            currentParticipantName 
+          });
+          
+          setIsAdmitted(wasAdmitted);
+          setIsDenied(wasDenied);
         }
       }
       
@@ -51,7 +71,7 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
     });
 
     return () => unsubscribe();
-  }, [sessionId, isHost, participantName]);
+  }, [sessionId, isHost, currentParticipantName]);
 
   // Join waiting room (for patients)
   const joinWaitingRoom = useCallback(async (name: string) => {
