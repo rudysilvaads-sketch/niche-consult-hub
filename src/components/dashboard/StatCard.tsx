@@ -31,11 +31,11 @@ export function StatCard({
       transition={{ duration: 0.2 }}
     >
       <div className="flex items-start justify-between">
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground font-medium">{title}</p>
+        <div className="space-y-1 sm:space-y-2 flex-1 min-w-0">
+          <p className="text-xs sm:text-sm text-muted-foreground font-medium truncate">{title}</p>
           <div className="space-y-0.5">
             <motion.p 
-              className="text-3xl font-bold text-foreground tracking-tight tabular-nums"
+              className="text-2xl sm:text-3xl font-bold text-foreground tracking-tight tabular-nums"
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.1, duration: 0.3 }}
@@ -43,13 +43,13 @@ export function StatCard({
               {value}
             </motion.p>
             {subtitle && (
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">{subtitle}</p>
             )}
           </div>
           {trend && (
             <motion.div 
               className={cn(
-                "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium",
+                "inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-md text-[10px] sm:text-xs font-medium",
                 trend.isPositive 
                   ? "bg-success/10 text-success" 
                   : "bg-destructive/10 text-destructive"
@@ -69,13 +69,13 @@ export function StatCard({
         </div>
         <motion.div 
           className={cn(
-            'h-12 w-12 rounded-xl flex items-center justify-center shrink-0',
+            'h-10 w-10 sm:h-12 sm:w-12 rounded-xl flex items-center justify-center shrink-0 ml-3',
             iconBgColor
           )}
           whileHover={{ scale: 1.1, rotate: 5 }}
           transition={{ duration: 0.2 }}
         >
-          <Icon className={cn('h-6 w-6', iconColor)} />
+          <Icon className={cn('h-5 w-5 sm:h-6 sm:w-6', iconColor)} />
         </motion.div>
       </div>
     </motion.div>

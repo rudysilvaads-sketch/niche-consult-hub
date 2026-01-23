@@ -74,36 +74,41 @@ const Agenda = () => {
 
   return (
     <MainLayout>
-      <div className="flex items-center justify-between mb-6">
+      {/* Header with responsive layout */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <Header 
           title="Agenda" 
-          subtitle="Gerencie suas consultas e horários"
+          subtitle="Gerencie suas consultas"
           onNewAppointment={handleNewAppointment}
         />
-        <Button variant="outline" onClick={() => setLinkManagerOpen(true)} className="gap-2">
+        <Button 
+          variant="outline" 
+          onClick={() => setLinkManagerOpen(true)} 
+          className="gap-2 w-full sm:w-auto"
+        >
           <Link2 className="h-4 w-4" />
-          Links de Cadastro
+          <span className="sm:inline">Links de Cadastro</span>
         </Button>
       </div>
 
-      {/* Week Navigation */}
-      <div className="card-elevated p-4 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <Button variant="ghost" size="icon" onClick={() => navigateWeek('prev')}>
+      {/* Week Navigation - Mobile optimized */}
+      <div className="card-elevated p-3 sm:p-4 mb-4 sm:mb-6">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <Button variant="ghost" size="icon" onClick={() => navigateWeek('prev')} className="h-9 w-9">
             <ChevronLeft className="h-5 w-5" />
           </Button>
           
-          <h2 className="font-display text-lg font-semibold text-foreground">
+          <h2 className="font-display text-base sm:text-lg font-semibold text-foreground text-center">
             {format(weekStart, "MMMM 'de' yyyy", { locale: ptBR })}
           </h2>
           
-          <Button variant="ghost" size="icon" onClick={() => navigateWeek('next')}>
+          <Button variant="ghost" size="icon" onClick={() => navigateWeek('next')} className="h-9 w-9">
             <ChevronRight className="h-5 w-5" />
           </Button>
         </div>
 
-        {/* Week Days */}
-        <div className="grid grid-cols-7 gap-2">
+        {/* Week Days - Scrollable on mobile */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
           {weekDays.map((day) => {
             const isSelected = format(day, 'yyyy-MM-dd') === format(selectedDate, 'yyyy-MM-dd');
             const isToday = format(day, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd');
@@ -116,7 +121,7 @@ const Agenda = () => {
                 key={day.toISOString()}
                 onClick={() => setSelectedDate(day)}
                 className={cn(
-                  'flex flex-col items-center p-3 rounded-xl transition-all duration-200',
+                  'flex flex-col items-center p-2 sm:p-3 rounded-lg sm:rounded-xl transition-all duration-200',
                   isSelected
                     ? 'bg-primary text-primary-foreground'
                     : 'hover:bg-secondary/50',
@@ -124,20 +129,20 @@ const Agenda = () => {
                 )}
               >
                 <span className={cn(
-                  'text-xs font-medium uppercase',
+                  'text-[10px] sm:text-xs font-medium uppercase',
                   isSelected ? 'text-primary-foreground/70' : 'text-muted-foreground'
                 )}>
-                  {format(day, 'EEE', { locale: ptBR })}
+                  {format(day, 'EEE', { locale: ptBR }).slice(0, 3)}
                 </span>
                 <span className={cn(
-                  'text-xl font-bold mt-1',
+                  'text-lg sm:text-xl font-bold mt-0.5 sm:mt-1',
                   isSelected ? 'text-primary-foreground' : 'text-foreground'
                 )}>
                   {format(day, 'd')}
                 </span>
                 {dayAppointments.length > 0 && (
                   <span className={cn(
-                    'text-xs mt-1 px-2 py-0.5 rounded-full',
+                    'text-[10px] sm:text-xs mt-0.5 sm:mt-1 px-1.5 sm:px-2 py-0.5 rounded-full',
                     isSelected 
                       ? 'bg-primary-foreground/20 text-primary-foreground' 
                       : 'bg-primary/10 text-primary'
@@ -151,8 +156,45 @@ const Agenda = () => {
         </div>
       </div>
 
-      {/* Appointments for Selected Day */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* Appointments for Selected Day - Stack on mobile */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+        {/* Day Summary - Show first on mobile */}
+        <div className="order-first lg:order-last card-elevated p-4 sm:p-6">
+          <h3 className="font-display text-base sm:text-lg font-semibold text-foreground mb-3 sm:mb-4">
+            Resumo do Dia
+          </h3>
+          
+          <div className="grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-4">
+            <div className="p-3 sm:p-4 rounded-xl bg-primary/10 text-center lg:text-left">
+              <p className="text-xl sm:text-2xl font-bold text-primary">{filteredAppointments.length}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Agendadas</p>
+            </div>
+            
+            <div className="p-3 sm:p-4 rounded-xl bg-success/10 text-center lg:text-left">
+              <p className="text-xl sm:text-2xl font-bold text-success">
+                {filteredAppointments.filter(a => a.status === 'confirmado').length}
+              </p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Confirmadas</p>
+            </div>
+            
+            <div className="p-3 sm:p-4 rounded-xl bg-warning/10 text-center lg:text-left">
+              <p className="text-xl sm:text-2xl font-bold text-warning">
+                {filteredAppointments.filter(a => a.status === 'agendado').length}
+              </p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Aguardando</p>
+            </div>
+          </div>
+
+          <Button 
+            className="w-full mt-4 sm:mt-6 btn-gradient"
+            onClick={handleNewAppointment}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Nova Consulta
+          </Button>
+        </div>
+
+        {/* Appointments List */}
         <div className="lg:col-span-2">
           <AppointmentList
             appointments={filteredAppointments}
@@ -162,42 +204,6 @@ const Agenda = () => {
             onDelete={handleDeleteAppointment}
             onStartSession={handleStartSession}
           />
-        </div>
-
-        {/* Day Summary */}
-        <div className="card-elevated p-6">
-          <h3 className="font-display text-lg font-semibold text-foreground mb-4">
-            Resumo do Dia
-          </h3>
-          
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-primary/10">
-              <p className="text-2xl font-bold text-primary">{filteredAppointments.length}</p>
-              <p className="text-sm text-muted-foreground">Consultas agendadas</p>
-            </div>
-            
-            <div className="p-4 rounded-xl bg-success/10">
-              <p className="text-2xl font-bold text-success">
-                {filteredAppointments.filter(a => a.status === 'confirmado').length}
-              </p>
-              <p className="text-sm text-muted-foreground">Confirmadas</p>
-            </div>
-            
-            <div className="p-4 rounded-xl bg-warning/10">
-              <p className="text-2xl font-bold text-warning">
-                {filteredAppointments.filter(a => a.status === 'agendado').length}
-              </p>
-              <p className="text-sm text-muted-foreground">Aguardando confirmação</p>
-            </div>
-          </div>
-
-          <Button 
-            className="w-full mt-6 btn-gradient"
-            onClick={handleNewAppointment}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Consulta
-          </Button>
         </div>
       </div>
 
