@@ -39,12 +39,15 @@ export function useWebRTCConnection({
 }: UseWebRTCProps) {
   const [localStream, setLocalStream] = useState<MediaStream | null>(null);
   const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
   const [connectionState, setConnectionState] = useState<RTCPeerConnectionState>('new');
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  const originalVideoTrackRef = useRef<MediaStreamTrack | null>(null);
   const unsubscribersRef = useRef<(() => void)[]>([]);
 
   // Initialize media devices
@@ -271,9 +274,98 @@ export function useWebRTCConnection({
     }
   }, [localStream]);
 
+  // Start screen sharing
+  const startScreenShare = useCallback(async () => {
+    if (!peerConnectionRef.current || !localStream) {
+      console.error('❌ Cannot share screen: no peer connection or local stream');
+      return;
+    }
+
+    try {
+      console.log('🖥️ Starting screen share...');
+      const stream = await navigator.mediaDevices.getDisplayMedia({
+        video: true,
+        audio: false,
+      });
+
+      const screenTrack = stream.getVideoTracks()[0];
+      setScreenStream(stream);
+
+      // Find the video sender and replace the track
+      const videoSender = peerConnectionRef.current
+        .getSenders()
+        .find((sender) => sender.track?.kind === 'video');
+
+      if (videoSender && videoSender.track) {
+        // Save original video track to restore later
+        originalVideoTrackRef.current = videoSender.track;
+        await videoSender.replaceTrack(screenTrack);
+        console.log('✅ Screen share started');
+        setIsScreenSharing(true);
+      }
+
+      // Handle when user stops sharing via browser UI
+      screenTrack.onended = () => {
+        console.log('🖥️ Screen share ended by user');
+        stopScreenShare();
+      };
+
+    } catch (err) {
+      console.error('❌ Error starting screen share:', err);
+      setError('Erro ao compartilhar tela');
+    }
+  }, [localStream]);
+
+  // Stop screen sharing
+  const stopScreenShare = useCallback(async () => {
+    if (!peerConnectionRef.current || !originalVideoTrackRef.current) {
+      return;
+    }
+
+    try {
+      console.log('🖥️ Stopping screen share...');
+      
+      // Stop screen stream tracks
+      if (screenStream) {
+        screenStream.getTracks().forEach((track) => track.stop());
+        setScreenStream(null);
+      }
+
+      // Restore original video track
+      const videoSender = peerConnectionRef.current
+        .getSenders()
+        .find((sender) => sender.track?.kind === 'video');
+
+      if (videoSender && originalVideoTrackRef.current) {
+        await videoSender.replaceTrack(originalVideoTrackRef.current);
+        originalVideoTrackRef.current = null;
+        console.log('✅ Original video restored');
+      }
+
+      setIsScreenSharing(false);
+
+    } catch (err) {
+      console.error('❌ Error stopping screen share:', err);
+    }
+  }, [screenStream]);
+
+  // Toggle screen share
+  const toggleScreenShare = useCallback(async () => {
+    if (isScreenSharing) {
+      await stopScreenShare();
+    } else {
+      await startScreenShare();
+    }
+  }, [isScreenSharing, startScreenShare, stopScreenShare]);
+
   // Cleanup
   const cleanup = useCallback(async () => {
     console.log('🧹 Cleaning up...');
+    
+    // Stop screen share first
+    if (screenStream) {
+      screenStream.getTracks().forEach((track) => track.stop());
+    }
     
     // Stop local tracks
     if (localStream) {
@@ -311,8 +403,11 @@ export function useWebRTCConnection({
 
     setLocalStream(null);
     setRemoteStream(null);
+    setScreenStream(null);
     setConnectionState('new');
-  }, [localStream, isHost, sessionId]);
+    setIsScreenSharing(false);
+    originalVideoTrackRef.current = null;
+  }, [localStream, screenStream, isHost, sessionId]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -324,13 +419,16 @@ export function useWebRTCConnection({
   return {
     localStream,
     remoteStream,
+    screenStream,
     connectionState,
     isMuted,
     isVideoOff,
+    isScreenSharing,
     error,
     startConnection,
     toggleMute,
     toggleVideo,
+    toggleScreenShare,
     cleanup,
     isConnected: connectionState === 'connected',
   };

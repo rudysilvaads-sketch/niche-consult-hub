@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Video, VideoOff, Mic, MicOff, Phone, PhoneOff, 
   MessageSquare, FileText, Clock, User, AlertCircle,
-  Loader2, Brain, Share2, Copy, Check
+  Loader2, Brain, Share2, Copy, Check, Monitor, MonitorOff
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -59,10 +59,12 @@ const VideoRoom = () => {
     connectionState,
     isMuted,
     isVideoOff,
+    isScreenSharing,
     error: webrtcError,
     startConnection,
     toggleMute,
     toggleVideo,
+    toggleScreenShare,
     cleanup,
     isConnected,
   } = useWebRTCConnection({
@@ -490,9 +492,25 @@ const VideoRoom = () => {
               variant={isVideoOff ? 'destructive' : 'secondary'}
               onClick={toggleVideo}
               className="rounded-full w-12 h-12 sm:w-14 sm:h-14"
-              disabled={!hasStartedCall}
+              disabled={!hasStartedCall || isScreenSharing}
             >
               {isVideoOff ? <VideoOff className="h-5 w-5 sm:h-6 sm:w-6" /> : <Video className="h-5 w-5 sm:h-6 sm:w-6" />}
+            </Button>
+
+            {/* Screen share button */}
+            <Button
+              size="lg"
+              variant={isScreenSharing ? 'default' : 'secondary'}
+              onClick={toggleScreenShare}
+              className="rounded-full w-12 h-12 sm:w-14 sm:h-14"
+              disabled={!hasStartedCall}
+              title={isScreenSharing ? 'Parar compartilhamento' : 'Compartilhar tela'}
+            >
+              {isScreenSharing ? (
+                <MonitorOff className="h-5 w-5 sm:h-6 sm:w-6" />
+              ) : (
+                <Monitor className="h-5 w-5 sm:h-6 sm:w-6" />
+              )}
             </Button>
 
             {/* Transcription toggle button */}
