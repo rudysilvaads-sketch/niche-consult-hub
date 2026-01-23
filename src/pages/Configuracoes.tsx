@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { User, Building, Bell, Shield, Palette, Camera, Loader2, X, Plus } from 'lucide-react';
+import { User, Building, Bell, Shield, Palette, Camera, Loader2, X, Plus, Upload, Check } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { Button } from '@/components/ui/button';
@@ -30,19 +30,31 @@ import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 
 const tabs = [
   { id: 'profile', label: 'Perfil', icon: User },
+  { id: 'branding', label: 'Personalização', icon: Palette },
   { id: 'clinic', label: 'Consultório', icon: Building },
   { id: 'notifications', label: 'Notificações', icon: Bell },
   { id: 'security', label: 'Segurança', icon: Shield },
-  { id: 'appearance', label: 'Aparência', icon: Palette },
+];
+
+const colorPresets = [
+  { name: 'Violeta', primary: '262 52% 47%', accent: '262 40% 94%', color: '#6d28d9' },
+  { name: 'Azul', primary: '221 83% 53%', accent: '221 40% 94%', color: '#3b82f6' },
+  { name: 'Verde', primary: '158 64% 42%', accent: '158 40% 94%', color: '#10b981' },
+  { name: 'Rosa', primary: '330 81% 60%', accent: '330 40% 94%', color: '#ec4899' },
+  { name: 'Laranja', primary: '25 95% 53%', accent: '25 40% 94%', color: '#f97316' },
+  { name: 'Ciano', primary: '192 91% 36%', accent: '192 40% 94%', color: '#0891b2' },
 ];
 
 const Configuracoes = () => {
   const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const logoInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState(0);
   
   const [profileData, setProfileData] = useState<Partial<ProfessionalProfile>>({
     name: '',
@@ -66,6 +78,14 @@ const Configuracoes = () => {
     clinicState: '',
   });
 
+  const [brandingData, setBrandingData] = useState({
+    brandName: 'Espaço Terapêutico',
+    brandTagline: 'Gestão para Terapeutas e Psicólogos',
+    brandEmail: '',
+    brandPhone: '',
+    brandWebsite: '',
+  });
+
   const [notifications, setNotifications] = useState({
     emailReminders: true,
     smsReminders: false,
@@ -74,7 +94,6 @@ const Configuracoes = () => {
     dailySummary: true,
   });
 
-  // Load profile data from Firestore
   useEffect(() => {
     const loadProfile = async () => {
       if (!user?.uid || !db || !isFirebaseConfigured) {
@@ -112,7 +131,6 @@ const Configuracoes = () => {
             setPhotoPreview(data.photoUrl);
           }
         } else {
-          // Initialize with user data
           setProfileData(prev => ({
             ...prev,
             name: user.displayName || '',
@@ -134,13 +152,11 @@ const Configuracoes = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Validate file size (max 2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast.error('Imagem muito grande. Máximo 2MB.');
       return;
     }
 
-    // Validate file type
     if (!['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
       toast.error('Formato inválido. Use JPG, PNG ou GIF.');
       return;
@@ -153,10 +169,38 @@ const Configuracoes = () => {
     reader.readAsDataURL(file);
   };
 
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Logo muito grande. Máximo 2MB.');
+      return;
+    }
+
+    if (!['image/jpeg', 'image/png', 'image/gif', 'image/svg+xml'].includes(file.type)) {
+      toast.error('Formato inválido. Use JPG, PNG, GIF ou SVG.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setLogoPreview(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleRemovePhoto = () => {
     setPhotoPreview(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleRemoveLogo = () => {
+    setLogoPreview(null);
+    if (logoInputRef.current) {
+      logoInputRef.current.value = '';
     }
   };
 
@@ -213,8 +257,8 @@ const Configuracoes = () => {
     }
   };
 
-  const handleSaveClinic = async () => {
-    await handleSaveProfile();
+  const handleSaveBranding = () => {
+    toast.success('Personalização salva com sucesso!');
   };
 
   const handleSaveNotifications = () => {
@@ -253,7 +297,7 @@ const Configuracoes = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Sidebar Navigation */}
-        <div className="card-elevated p-4">
+        <div className="glass-card p-4">
           <nav className="space-y-1">
             {tabs.map((tab) => (
               <button
@@ -262,11 +306,11 @@ const Configuracoes = () => {
                 className={cn(
                   'w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200',
                   activeTab === tab.id
-                    ? 'bg-primary text-primary-foreground'
-                    : 'hover:bg-secondary/50 text-foreground'
+                    ? 'bg-accent text-accent-foreground'
+                    : 'hover:bg-secondary text-muted-foreground hover:text-foreground'
                 )}
               >
-                <tab.icon className="h-5 w-5" />
+                <tab.icon className={cn('h-5 w-5', activeTab === tab.id && 'text-primary')} />
                 <span className="font-medium">{tab.label}</span>
               </button>
             ))}
@@ -274,7 +318,7 @@ const Configuracoes = () => {
         </div>
 
         {/* Content Area */}
-        <div className="lg:col-span-3 card-elevated p-6">
+        <div className="lg:col-span-3 glass-card p-6">
           {activeTab === 'profile' && (
             <div className="space-y-6 animate-fade-in">
               <div>
@@ -304,7 +348,7 @@ const Configuracoes = () => {
                       </button>
                     </div>
                   ) : (
-                    <div className="h-24 w-24 rounded-full bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-2xl font-bold">
+                    <div className="h-24 w-24 rounded-full avatar-gradient flex items-center justify-center text-2xl font-bold">
                       {getInitials(profileData.name || '')}
                     </div>
                   )}
@@ -413,9 +457,6 @@ const Configuracoes = () => {
                   placeholder="Descreva sua formação, experiência e abordagem terapêutica..."
                   className="input-styled mt-1 min-h-[100px]"
                 />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Esta descrição aparecerá na sua página de agendamento.
-                </p>
               </div>
 
               {/* Therapy Approaches */}
@@ -480,20 +521,20 @@ const Configuracoes = () => {
               <div className="space-y-4">
                 <Label>Modalidade de Atendimento</Label>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 flex-1">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 flex-1">
                     <div>
                       <p className="font-medium text-foreground">Atendimento Online</p>
-                      <p className="text-sm text-muted-foreground">Sessões por videochamada</p>
+                      <p className="text-sm text-muted-foreground">Videochamadas</p>
                     </div>
                     <Switch 
                       checked={profileData.onlineService}
                       onCheckedChange={(checked) => setProfileData({ ...profileData, onlineService: checked })}
                     />
                   </div>
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 flex-1">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50 flex-1">
                     <div>
                       <p className="font-medium text-foreground">Atendimento Presencial</p>
-                      <p className="text-sm text-muted-foreground">Sessões no consultório</p>
+                      <p className="text-sm text-muted-foreground">No consultório</p>
                     </div>
                     <Switch 
                       checked={profileData.inPersonService}
@@ -504,19 +545,188 @@ const Configuracoes = () => {
               </div>
 
               <div className="pt-4 border-t border-border">
-                <Button 
-                  className="btn-gradient" 
-                  onClick={handleSaveProfile}
-                  disabled={isSaving}
-                >
+                <Button className="btn-gradient" onClick={handleSaveProfile} disabled={isSaving}>
                   {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       Salvando...
                     </>
                   ) : (
-                    'Salvar Perfil'
+                    'Salvar Alterações'
                   )}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'branding' && (
+            <div className="space-y-6 animate-fade-in">
+              <div>
+                <h2 className="font-display text-xl font-semibold text-foreground mb-1">
+                  Personalização da Marca
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Personalize as cores, logo e informações da sua clínica.
+                </p>
+              </div>
+
+              {/* Logo Upload */}
+              <div className="p-5 rounded-xl bg-secondary/30 border border-border">
+                <Label className="mb-4 block">Logo da Clínica</Label>
+                <div className="flex items-center gap-6">
+                  <div className="relative">
+                    {logoPreview ? (
+                      <div className="relative">
+                        <img
+                          src={logoPreview}
+                          alt="Logo"
+                          className="h-20 w-20 rounded-xl object-contain bg-white p-2 border border-border"
+                        />
+                        <button
+                          onClick={handleRemoveLogo}
+                          className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-destructive text-destructive-foreground flex items-center justify-center hover:bg-destructive/90"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="h-20 w-20 rounded-xl bg-secondary border-2 border-dashed border-border flex items-center justify-center">
+                        <Upload className="h-6 w-6 text-muted-foreground" />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/gif,image/svg+xml"
+                      onChange={handleLogoChange}
+                      className="hidden"
+                    />
+                    <Button 
+                      variant="outline" 
+                      onClick={() => logoInputRef.current?.click()}
+                      className="gap-2"
+                    >
+                      <Upload className="h-4 w-4" />
+                      {logoPreview ? 'Alterar Logo' : 'Enviar Logo'}
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">
+                      PNG, JPG, GIF ou SVG. Máximo 2MB. Recomendado: 512x512px
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Color Selection */}
+              <div className="p-5 rounded-xl bg-secondary/30 border border-border">
+                <Label className="mb-4 block">Cor Principal</Label>
+                <div className="flex flex-wrap gap-3">
+                  {colorPresets.map((preset, index) => (
+                    <button
+                      key={preset.name}
+                      onClick={() => setSelectedColor(index)}
+                      className={cn(
+                        'color-option flex items-center justify-center',
+                        selectedColor === index && 'selected'
+                      )}
+                      style={{ backgroundColor: preset.color }}
+                      title={preset.name}
+                    >
+                      {selectedColor === index && (
+                        <Check className="h-4 w-4 text-white" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
+                  Esta cor será usada nos botões, links e acentos do sistema.
+                </p>
+              </div>
+
+              {/* Brand Info */}
+              <div className="space-y-4">
+                <Label className="block text-base">Informações da Marca</Label>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="brandName">Nome da Clínica</Label>
+                    <Input 
+                      id="brandName" 
+                      value={brandingData.brandName}
+                      onChange={(e) => setBrandingData({ ...brandingData, brandName: e.target.value })}
+                      placeholder="Espaço Terapêutico"
+                      className="input-styled mt-1" 
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="brandTagline">Slogan / Descrição</Label>
+                    <Input 
+                      id="brandTagline" 
+                      value={brandingData.brandTagline}
+                      onChange={(e) => setBrandingData({ ...brandingData, brandTagline: e.target.value })}
+                      placeholder="Gestão para Terapeutas"
+                      className="input-styled mt-1" 
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="brandEmail">E-mail de Contato</Label>
+                    <Input 
+                      id="brandEmail" 
+                      type="email"
+                      value={brandingData.brandEmail}
+                      onChange={(e) => setBrandingData({ ...brandingData, brandEmail: e.target.value })}
+                      placeholder="contato@clinica.com.br"
+                      className="input-styled mt-1" 
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="brandPhone">Telefone de Contato</Label>
+                    <Input 
+                      id="brandPhone" 
+                      value={brandingData.brandPhone}
+                      onChange={(e) => setBrandingData({ ...brandingData, brandPhone: e.target.value })}
+                      placeholder="(11) 99999-9999"
+                      className="input-styled mt-1" 
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="brandWebsite">Website</Label>
+                    <Input 
+                      id="brandWebsite" 
+                      value={brandingData.brandWebsite}
+                      onChange={(e) => setBrandingData({ ...brandingData, brandWebsite: e.target.value })}
+                      placeholder="www.suaclinica.com.br"
+                      className="input-styled mt-1" 
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview */}
+              <div className="p-5 rounded-xl bg-secondary/30 border border-border">
+                <Label className="mb-4 block">Pré-visualização</Label>
+                <div className="flex items-center gap-4 p-4 bg-white rounded-lg border border-border">
+                  {logoPreview ? (
+                    <img src={logoPreview} alt="Logo" className="h-12 w-12 rounded-lg object-contain" />
+                  ) : (
+                    <div 
+                      className="h-12 w-12 rounded-lg flex items-center justify-center text-white font-bold"
+                      style={{ backgroundColor: colorPresets[selectedColor].color }}
+                    >
+                      {brandingData.brandName.substring(0, 2).toUpperCase()}
+                    </div>
+                  )}
+                  <div>
+                    <p className="font-semibold text-foreground">{brandingData.brandName || 'Nome da Clínica'}</p>
+                    <p className="text-sm text-muted-foreground">{brandingData.brandTagline || 'Sua descrição aqui'}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-border">
+                <Button className="btn-gradient" onClick={handleSaveBranding}>
+                  Salvar Personalização
                 </Button>
               </div>
             </div>
@@ -529,44 +739,44 @@ const Configuracoes = () => {
                   Dados do Consultório
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Configure as informações do seu espaço de atendimento.
+                  Informações do local de atendimento presencial.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="col-span-2">
-                  <Label htmlFor="clinicName">Nome do Consultório/Espaço</Label>
+                <div className="md:col-span-2">
+                  <Label htmlFor="clinicName">Nome do Consultório</Label>
                   <Input 
                     id="clinicName" 
                     value={clinicData.clinicName}
                     onChange={(e) => setClinicData({ ...clinicData, clinicName: e.target.value })}
-                    placeholder="Espaço Terapêutico Online"
+                    placeholder="Consultório de Psicologia"
                     className="input-styled mt-1" 
                   />
                 </div>
-                <div className="col-span-2">
-                  <Label htmlFor="address">Endereço</Label>
+                <div className="md:col-span-2">
+                  <Label htmlFor="clinicAddress">Endereço Completo</Label>
                   <Input 
-                    id="address" 
+                    id="clinicAddress" 
                     value={clinicData.clinicAddress}
                     onChange={(e) => setClinicData({ ...clinicData, clinicAddress: e.target.value })}
-                    placeholder="Rua das Flores, 123 - Sala 401"
+                    placeholder="Rua, número, complemento"
                     className="input-styled mt-1" 
                   />
                 </div>
                 <div>
-                  <Label htmlFor="city">Cidade</Label>
+                  <Label htmlFor="clinicCity">Cidade</Label>
                   <Input 
-                    id="city" 
+                    id="clinicCity" 
                     value={clinicData.clinicCity}
                     onChange={(e) => setClinicData({ ...clinicData, clinicCity: e.target.value })}
                     className="input-styled mt-1" 
                   />
                 </div>
                 <div>
-                  <Label htmlFor="state">Estado</Label>
+                  <Label htmlFor="clinicState">Estado</Label>
                   <Input 
-                    id="state" 
+                    id="clinicState" 
                     value={clinicData.clinicState}
                     onChange={(e) => setClinicData({ ...clinicData, clinicState: e.target.value })}
                     className="input-styled mt-1" 
@@ -575,11 +785,7 @@ const Configuracoes = () => {
               </div>
 
               <div className="pt-4 border-t border-border">
-                <Button 
-                  className="btn-gradient" 
-                  onClick={handleSaveClinic}
-                  disabled={isSaving}
-                >
+                <Button className="btn-gradient" onClick={handleSaveProfile} disabled={isSaving}>
                   {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -600,55 +806,59 @@ const Configuracoes = () => {
                   Preferências de Notificação
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Escolha como deseja receber alertas e lembretes.
+                  Configure como e quando você deseja receber notificações.
                 </p>
               </div>
 
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
                   <div>
-                    <p className="font-medium text-foreground">Lembretes por e-mail</p>
-                    <p className="text-sm text-muted-foreground">Receba lembretes de sessões por e-mail</p>
+                    <p className="font-medium text-foreground">Lembretes por E-mail</p>
+                    <p className="text-sm text-muted-foreground">Receber lembretes de consulta por e-mail</p>
                   </div>
                   <Switch 
                     checked={notifications.emailReminders}
                     onCheckedChange={(checked) => setNotifications({ ...notifications, emailReminders: checked })}
                   />
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
                   <div>
                     <p className="font-medium text-foreground">Lembretes por SMS</p>
-                    <p className="text-sm text-muted-foreground">Receba lembretes de sessões via SMS</p>
+                    <p className="text-sm text-muted-foreground">Receber lembretes de consulta por SMS</p>
                   </div>
                   <Switch 
                     checked={notifications.smsReminders}
                     onCheckedChange={(checked) => setNotifications({ ...notifications, smsReminders: checked })}
                   />
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
                   <div>
-                    <p className="font-medium text-foreground">Novo paciente</p>
-                    <p className="text-sm text-muted-foreground">Notificação quando um novo paciente agenda</p>
+                    <p className="font-medium text-foreground">Novo Paciente</p>
+                    <p className="text-sm text-muted-foreground">Notificar quando um novo paciente se cadastrar</p>
                   </div>
                   <Switch 
                     checked={notifications.newPatient}
                     onCheckedChange={(checked) => setNotifications({ ...notifications, newPatient: checked })}
                   />
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
                   <div>
                     <p className="font-medium text-foreground">Cancelamentos</p>
-                    <p className="text-sm text-muted-foreground">Alerta quando uma sessão é cancelada</p>
+                    <p className="text-sm text-muted-foreground">Notificar quando uma consulta for cancelada</p>
                   </div>
                   <Switch 
                     checked={notifications.cancelation}
                     onCheckedChange={(checked) => setNotifications({ ...notifications, cancelation: checked })}
                   />
                 </div>
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
                   <div>
-                    <p className="font-medium text-foreground">Resumo diário</p>
-                    <p className="text-sm text-muted-foreground">Receba um resumo das sessões do dia</p>
+                    <p className="font-medium text-foreground">Resumo Diário</p>
+                    <p className="text-sm text-muted-foreground">Receber um resumo diário das atividades</p>
                   </div>
                   <Switch 
                     checked={notifications.dailySummary}
@@ -672,7 +882,7 @@ const Configuracoes = () => {
                   Segurança da Conta
                 </h2>
                 <p className="text-sm text-muted-foreground">
-                  Mantenha sua conta segura atualizando suas credenciais.
+                  Gerencie a senha e a segurança da sua conta.
                 </p>
               </div>
 
@@ -695,46 +905,6 @@ const Configuracoes = () => {
                 <Button className="btn-gradient" onClick={handleChangePassword}>
                   Alterar Senha
                 </Button>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'appearance' && (
-            <div className="space-y-6 animate-fade-in">
-              <div>
-                <h2 className="font-display text-xl font-semibold text-foreground mb-1">
-                  Aparência
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  Personalize a aparência do sistema.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
-                  <div>
-                    <p className="font-medium text-foreground">Tema do Sistema</p>
-                    <p className="text-sm text-muted-foreground">Selecione o tema preferido</p>
-                  </div>
-                  <Select defaultValue="light">
-                    <SelectTrigger className="w-32">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="light">Claro</SelectItem>
-                      <SelectItem value="dark">Escuro</SelectItem>
-                      <SelectItem value="system">Sistema</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/30">
-                  <div>
-                    <p className="font-medium text-foreground">Animações</p>
-                    <p className="text-sm text-muted-foreground">Ativar animações de interface</p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
               </div>
             </div>
           )}

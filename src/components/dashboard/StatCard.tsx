@@ -26,17 +26,17 @@ export function StatCard({
   return (
     <div className="stat-card group animate-slide-up">
       <div className="flex items-start justify-between">
-        <div className="space-y-3">
+        <div className="space-y-2">
           <p className="text-sm text-muted-foreground font-medium">{title}</p>
-          <div className="space-y-1">
-            <p className="metric-value text-foreground">{value}</p>
+          <div className="space-y-0.5">
+            <p className="text-3xl font-bold text-foreground tracking-tight tabular-nums">{value}</p>
             {subtitle && (
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             )}
           </div>
           {trend && (
             <div className={cn(
-              "inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium",
+              "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium",
               trend.isPositive 
                 ? "bg-success/10 text-success" 
                 : "bg-destructive/10 text-destructive"
@@ -51,10 +51,10 @@ export function StatCard({
           )}
         </div>
         <div className={cn(
-          'h-11 w-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110',
+          'h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105',
           iconBgColor
         )}>
-          <Icon className={cn('h-5 w-5', iconColor)} />
+          <Icon className={cn('h-6 w-6', iconColor)} />
         </div>
       </div>
     </div>

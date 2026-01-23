@@ -10,7 +10,7 @@ interface HeaderProps {
 export function Header({ title, subtitle, onNewAppointment }: HeaderProps) {
   return (
     <header className="flex items-center justify-between mb-8">
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         <h1 className="font-display text-2xl font-bold text-foreground tracking-tight">{title}</h1>
         {subtitle && (
           <p className="text-sm text-muted-foreground">{subtitle}</p>
@@ -23,18 +23,18 @@ export function Header({ title, subtitle, onNewAppointment }: HeaderProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             placeholder="Buscar..."
-            className="h-9 w-56 pl-9 pr-12 rounded-lg bg-secondary/50 border border-border/50 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all"
+            className="h-9 w-56 pl-9 pr-12 rounded-lg bg-secondary border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/50 transition-all"
           />
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-secondary text-muted-foreground">
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
             <Command className="h-3 w-3" />
             <span className="text-[10px] font-medium">K</span>
           </div>
         </div>
 
         {/* Notifications */}
-        <Button variant="ghost" size="icon" className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-secondary/60">
+        <Button variant="ghost" size="icon" className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-secondary">
           <Bell className="h-[18px] w-[18px]" />
-          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary animate-pulse" />
+          <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-primary" />
         </Button>
 
         {/* New Appointment */}
