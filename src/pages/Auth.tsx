@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Loader2, ArrowLeft, CheckCircle2, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -461,7 +461,14 @@ const Auth = () => {
           </Tabs>
 
           <p className="text-xs text-muted-foreground text-center mt-6">
-            Ao continuar, você concorda com nossos termos de uso.
+            Ao continuar, você concorda com nossos{' '}
+            <Link to="/termos" className="text-primary hover:underline">
+              Termos de Uso
+            </Link>{' '}
+            e{' '}
+            <Link to="/privacidade" className="text-primary hover:underline">
+              Política de Privacidade
+            </Link>.
           </p>
         </div>
       </div>
