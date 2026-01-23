@@ -361,7 +361,13 @@ const VideoRoom = () => {
     }
 
     // Patient is in waiting room
-    return <WaitingRoom patientName={patientName} messages={waitingRoomMessages} />;
+    return (
+      <WaitingRoom 
+        patientName={patientName} 
+        messages={waitingRoomMessages} 
+        onSendMessage={(msg) => sendMessage(msg, patientName)}
+      />
+    );
   }
 
   if (showAnalysis && analysis) {
