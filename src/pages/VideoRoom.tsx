@@ -363,6 +363,12 @@ const VideoRoom = () => {
               Transcrevendo
             </Badge>
           )}
+          {transcriptionError && (
+            <Badge variant="destructive" className="hidden sm:flex text-xs">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              Transcrição indisponível
+            </Badge>
+          )}
         </div>
       </div>
 
