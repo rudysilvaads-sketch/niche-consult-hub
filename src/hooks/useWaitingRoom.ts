@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove } from 'firebase/firestore';
+import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
 
 interface WaitingParticipant {
@@ -85,10 +85,25 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
     };
 
     try {
-      await updateDoc(callDoc, {
-        waitingParticipants: arrayUnion(participant),
-      });
-      console.log('✅ Joined waiting room');
+      // Check if document exists, if not create it
+      const docSnap = await getDoc(callDoc);
+      
+      if (!docSnap.exists()) {
+        // Create the document with initial waiting participant
+        await setDoc(callDoc, {
+          waitingParticipants: [participant],
+          admittedParticipants: [],
+          deniedParticipants: [],
+          createdAt: new Date().toISOString(),
+        });
+        console.log('✅ Created call document and joined waiting room');
+      } else {
+        // Document exists, just add to waiting list
+        await updateDoc(callDoc, {
+          waitingParticipants: arrayUnion(participant),
+        });
+        console.log('✅ Joined waiting room');
+      }
     } catch (error) {
       console.error('❌ Error joining waiting room:', error);
     }
