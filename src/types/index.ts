@@ -125,6 +125,11 @@ export interface Appointment {
   value?: number;
   paymentStatus?: PaymentStatus;
   paymentMethod?: PaymentMethod;
+  // Reminder tracking
+  reminderSent1h?: boolean;
+  reminderSent24h?: boolean;
+  reminderSent1hAt?: string;
+  reminderSent24hAt?: string;
 }
 
 export interface ConsultationRecord {
