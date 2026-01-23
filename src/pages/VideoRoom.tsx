@@ -62,12 +62,14 @@ const VideoRoom = () => {
   // Waiting room
   const {
     waitingParticipants,
+    messages: waitingRoomMessages,
     isAdmitted,
     isDenied,
     joinWaitingRoom,
     leaveWaitingRoom,
     admitParticipant,
     denyParticipant,
+    sendMessage,
   } = useWaitingRoom({
     sessionId: sessionId || '',
     isHost,
@@ -359,7 +361,7 @@ const VideoRoom = () => {
     }
 
     // Patient is in waiting room
-    return <WaitingRoom patientName={patientName} />;
+    return <WaitingRoom patientName={patientName} messages={waitingRoomMessages} />;
   }
 
   if (showAnalysis && analysis) {
@@ -554,6 +556,7 @@ const VideoRoom = () => {
                   waitingSince={new Date(participant.joinedAt)}
                   onAdmit={() => admitParticipant(participant)}
                   onDeny={() => denyParticipant(participant)}
+                  onSendMessage={(msg) => sendMessage(msg, user?.email || 'Profissional')}
                 />
               ))}
             </div>
