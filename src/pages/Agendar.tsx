@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useApp } from '@/contexts/AppContext';
+// Removed useApp dependency for public booking page
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
@@ -43,7 +43,8 @@ const DEFAULT_CONSULTATION_TYPES = [
 type Step = 'type' | 'date' | 'time' | 'form' | 'confirmation';
 
 const Agendar = () => {
-  const { appointments, addAppointment, addPatient, patients } = useApp();
+  // Remove dependency on useApp context for public booking page
+  const [appointments, setAppointments] = useState<Array<{ date: string; time: string; status: string }>>([]);
   
   const [step, setStep] = useState<Step>('type');
   const [selectedType, setSelectedType] = useState<string | null>(null);
@@ -60,36 +61,70 @@ const Agendar = () => {
   const [bookingComplete, setBookingComplete] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
   
-  // Profile state
+  // Profile state - start as not loading to show page immediately
   const [profile, setProfile] = useState<Partial<ProfessionalProfile> | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(false);
 
-  // Load therapist profile
+  // Load therapist profile and appointments with timeout and error handling
   useEffect(() => {
-    const loadProfile = async () => {
+    let isMounted = true;
+    
+    const loadData = async () => {
+      // If Firebase is not configured, skip loading immediately
       if (!db || !isFirebaseConfigured) {
-        setIsLoadingProfile(false);
+        if (isMounted) setIsLoadingProfile(false);
         return;
       }
 
       try {
-        // Get the first profile (assuming single therapist)
+        // Load profile and appointments in parallel
         const profilesRef = collection(db, 'profiles');
-        const q = query(profilesRef, limit(1));
-        const snapshot = await getDocs(q);
+        const appointmentsRef = collection(db, 'appointments');
         
-        if (!snapshot.empty) {
-          const profileData = snapshot.docs[0].data() as ProfessionalProfile;
-          setProfile(profileData);
+        const [profileSnapshot, appointmentsSnapshot] = await Promise.all([
+          getDocs(query(profilesRef, limit(1))),
+          getDocs(appointmentsRef)
+        ]);
+        
+        if (isMounted) {
+          if (!profileSnapshot.empty) {
+            const profileData = profileSnapshot.docs[0].data() as ProfessionalProfile;
+            setProfile(profileData);
+          }
+          
+          // Load appointments for availability checking
+          const loadedAppointments = appointmentsSnapshot.docs.map(doc => ({
+            date: doc.data().date || '',
+            time: doc.data().time || '',
+            status: doc.data().status || ''
+          }));
+          setAppointments(loadedAppointments);
+          
+          setIsLoadingProfile(false);
         }
       } catch (error) {
-        console.error('Error loading profile:', error);
-      } finally {
-        setIsLoadingProfile(false);
+        console.error('Error loading data:', error);
+        // Even on error, stop loading and use default values
+        if (isMounted) {
+          setIsLoadingProfile(false);
+        }
       }
     };
 
-    loadProfile();
+    // Set a timeout to prevent infinite loading (3 seconds max)
+    const timeoutId = setTimeout(() => {
+      if (isMounted) {
+        console.log('Loading timeout, using defaults');
+        setIsLoadingProfile(false);
+      }
+    }, 3000);
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   // Dynamic consultation types based on profile
