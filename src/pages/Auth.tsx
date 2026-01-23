@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, User, Loader2, FlaskConical, CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
+import { db, isFirebaseConfigured } from '@/lib/firebase';
+import { collection, addDoc, deleteDoc, doc } from 'firebase/firestore';
 
 const loginSchema = z.object({
   email: z.string().trim().email('Email inválido'),
@@ -295,6 +297,9 @@ const Auth = () => {
           </CardContent>
         </Card>
 
+        {/* Firebase Connection Test */}
+        <FirebaseTestButton />
+
         <p className="text-center text-sm text-muted-foreground mt-6">
           Ao continuar, você concorda com nossos Termos de Uso
         </p>
@@ -302,5 +307,105 @@ const Auth = () => {
     </div>
   );
 };
+
+// Test button component
+function FirebaseTestButton() {
+  const [testing, setTesting] = useState(false);
+  const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const testFirebaseConnection = async () => {
+    setTesting(true);
+    setResult(null);
+
+    if (!isFirebaseConfigured || !db) {
+      setResult({ success: false, message: 'Firebase não está configurado. Verifique os secrets.' });
+      setTesting(false);
+      return;
+    }
+
+    try {
+      // Create a test patient
+      const testPatient = {
+        name: 'Paciente Teste',
+        email: 'teste@exemplo.com',
+        phone: '(11) 99999-9999',
+        birthDate: '1990-01-01',
+        status: 'active',
+        notes: 'Paciente de teste para validar conexão com Firebase',
+        createdAt: new Date().toISOString(),
+      };
+
+      const docRef = await addDoc(collection(db, 'patients'), testPatient);
+      
+      // Delete the test patient
+      await deleteDoc(doc(db, 'patients', docRef.id));
+
+      setResult({ 
+        success: true, 
+        message: `✅ Conexão OK! Paciente criado (ID: ${docRef.id}) e removido com sucesso.` 
+      });
+    } catch (error: any) {
+      console.error('Firebase test error:', error);
+      let message = 'Erro ao testar conexão';
+      
+      if (error.code === 'permission-denied') {
+        message = 'Permissão negada. Verifique as regras de segurança do Firestore.';
+      } else if (error.message) {
+        message = error.message;
+      }
+      
+      setResult({ success: false, message });
+    } finally {
+      setTesting(false);
+    }
+  };
+
+  return (
+    <Card className="mt-4 border-dashed">
+      <CardContent className="pt-4">
+        <div className="flex flex-col items-center gap-3">
+          <p className="text-sm text-muted-foreground text-center">
+            Teste a conexão com o Firebase
+          </p>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={testFirebaseConnection}
+            disabled={testing}
+            className="gap-2"
+          >
+            {testing ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Testando...
+              </>
+            ) : (
+              <>
+                <FlaskConical className="h-4 w-4" />
+                Testar Conexão
+              </>
+            )}
+          </Button>
+          
+          {result && (
+            <div className={cn(
+              "p-3 rounded-lg text-sm w-full text-center flex items-center justify-center gap-2",
+              result.success 
+                ? "bg-primary/10 text-primary" 
+                : "bg-destructive/10 text-destructive"
+            )}>
+              {result.success ? (
+                <CheckCircle2 className="h-4 w-4 shrink-0" />
+              ) : (
+                <XCircle className="h-4 w-4 shrink-0" />
+              )}
+              <span>{result.message}</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default Auth;
