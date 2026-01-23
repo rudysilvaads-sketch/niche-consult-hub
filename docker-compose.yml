@@ -1,0 +1,51 @@
+# ========================================
+# Docker Compose - Espaço Terapêutico Online
+# ========================================
+# 
+# USO:
+#   1. Build e iniciar:
+#      docker-compose up -d --build
+#   
+#   2. Ver logs:
+#      docker-compose logs -f
+#   
+#   3. Parar:
+#      docker-compose down
+#
+# ========================================
+
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: espacoterapeutico
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Domínio para SSL (altere para seu domínio)
+      - DOMAIN=espacoterapeuticoonline.com.br
+      # Email para notificações do Let's Encrypt
+      - SSL_EMAIL=contato@espacoterapeuticoonline.com.br
+      # Descomente para pular SSL (desenvolvimento local)
+      # - SKIP_SSL=true
+    volumes:
+      # Persistir certificados SSL
+      - letsencrypt:/etc/letsencrypt
+      - certbot-www:/var/www/certbot
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  letsencrypt:
+    driver: local
+  certbot-www:
+    driver: local
