@@ -17,6 +17,8 @@ export interface Professional {
   avatar?: string;
 }
 
+export type PatientStatus = 'ativo' | 'inativo';
+
 export interface Patient {
   id: string;
   name: string;
@@ -26,6 +28,7 @@ export interface Patient {
   cpf: string;
   address?: string;
   notes?: string;
+  status: PatientStatus;
   createdAt: string;
   // Financial
   packageId?: string;
