@@ -1,11 +1,17 @@
 import { Calendar, UserPlus, FileText, ClipboardList, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 interface QuickActionsProps {
   onNewAppointment?: () => void;
   hasPatients?: boolean;
 }
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -10 },
+  visible: { opacity: 1, x: 0 },
+};
 
 export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActionsProps) {
   const actions = [
@@ -56,17 +62,30 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
         Ações Rápidas
       </h3>
       
-      <div className="space-y-2">
-        {actions.map((action, index) => {
+      <motion.div 
+        className="space-y-2"
+        initial="hidden"
+        animate="visible"
+        variants={{
+          visible: {
+            transition: { staggerChildren: 0.05 }
+          }
+        }}
+      >
+        {actions.map((action) => {
           const content = (
             <>
-              <div className={cn(
-                'h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105',
-                action.bgColor,
-                action.disabled && 'opacity-50'
-              )}>
+              <motion.div 
+                className={cn(
+                  'h-10 w-10 rounded-lg flex items-center justify-center shrink-0',
+                  action.bgColor,
+                  action.disabled && 'opacity-50'
+                )}
+                whileHover={!action.disabled ? { scale: 1.1 } : undefined}
+                transition={{ duration: 0.2 }}
+              >
                 <action.icon className={cn('h-[18px] w-[18px]', action.color)} />
-              </div>
+              </motion.div>
               <div className="flex-1 text-left">
                 <p className={cn(
                   "text-sm font-medium text-foreground",
@@ -74,55 +93,63 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
                 )}>{action.label}</p>
                 <p className="text-xs text-muted-foreground">{action.description}</p>
               </div>
-              <ChevronRight className={cn(
-                "h-4 w-4 text-muted-foreground/40 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:text-muted-foreground",
-                action.disabled && 'opacity-0'
-              )} />
+              <motion.div
+                initial={{ x: 0 }}
+                whileHover={{ x: 4 }}
+                transition={{ duration: 0.2 }}
+              >
+                <ChevronRight className={cn(
+                  "h-4 w-4 text-muted-foreground/40",
+                  action.disabled && 'opacity-0'
+                )} />
+              </motion.div>
             </>
           );
 
           const baseClasses = cn(
-            "action-btn group animate-slide-up",
+            "action-btn group",
             action.disabled && "cursor-not-allowed opacity-60"
           );
 
           if (action.disabled) {
             return (
-              <div
+              <motion.div
                 key={action.label}
                 className={baseClasses}
-                style={{ animationDelay: `${index * 50}ms` }}
+                variants={itemVariants}
               >
                 {content}
-              </div>
+              </motion.div>
             );
           }
 
           if (action.onClick) {
             return (
-              <button
+              <motion.button
                 key={action.label}
                 onClick={action.onClick}
                 className={baseClasses}
-                style={{ animationDelay: `${index * 50}ms` }}
+                variants={itemVariants}
+                whileHover={{ backgroundColor: 'hsl(var(--secondary))' }}
+                whileTap={{ scale: 0.98 }}
               >
                 {content}
-              </button>
+              </motion.button>
             );
           }
 
           return (
-            <Link
-              key={action.label}
-              to={action.to || '/'}
-              className={baseClasses}
-              style={{ animationDelay: `${index * 50}ms` }}
-            >
-              {content}
-            </Link>
+            <motion.div key={action.label} variants={itemVariants}>
+              <Link
+                to={action.to || '/'}
+                className={baseClasses}
+              >
+                {content}
+              </Link>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
     </div>
   );
 }
