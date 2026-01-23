@@ -7,6 +7,7 @@ import { AppProvider } from "./contexts/AppContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
+import { CookieConsentBanner } from "./components/cookies/CookieConsentBanner";
 import Index from "./pages/Index";
 import Agenda from "./pages/Agenda";
 import Agendar from "./pages/Agendar";
@@ -21,6 +22,9 @@ import Configuracoes from "./pages/Configuracoes";
 import VideoRoom from "./pages/VideoRoom";
 import ResumoSessao from "./pages/ResumoSessao";
 import InstalarApp from "./pages/InstalarApp";
+import TermosDeUso from "./pages/TermosDeUso";
+import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
+import PoliticaCookies from "./pages/PoliticaCookies";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +47,11 @@ const App = () => (
                 <Route path="/sala/:sessionId" element={<VideoRoom />} />
                 <Route path="/instalar" element={<InstalarApp />} />
                 
+                {/* Legal pages */}
+                <Route path="/termos" element={<TermosDeUso />} />
+                <Route path="/privacidade" element={<PoliticaPrivacidade />} />
+                <Route path="/cookies" element={<PoliticaCookies />} />
+                
                 {/* Protected routes */}
                 <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
                 <Route path="/agenda" element={<ProtectedRoute><Agenda /></ProtectedRoute>} />
@@ -55,6 +64,9 @@ const App = () => (
                 
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              
+              {/* Cookie Consent Banner */}
+              <CookieConsentBanner />
             </BrowserRouter>
           </AppProvider>
         </AuthProvider>
