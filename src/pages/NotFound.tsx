@@ -5,6 +5,161 @@ import { Home, ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Branding } from "@/components/branding/Branding";
 
+// Animated SVG Illustration Component
+const NotFoundIllustration = () => (
+  <svg
+    viewBox="0 0 400 300"
+    className="w-full max-w-md mx-auto"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    {/* Background clouds */}
+    <motion.g
+      animate={{ x: [0, 20, 0] }}
+      transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <ellipse cx="80" cy="60" rx="40" ry="20" className="fill-muted/50" />
+      <ellipse cx="100" cy="55" rx="30" ry="15" className="fill-muted/50" />
+    </motion.g>
+    
+    <motion.g
+      animate={{ x: [0, -15, 0] }}
+      transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <ellipse cx="320" cy="80" rx="35" ry="18" className="fill-muted/40" />
+      <ellipse cx="340" cy="75" rx="25" ry="12" className="fill-muted/40" />
+    </motion.g>
+
+    {/* Ground */}
+    <ellipse cx="200" cy="270" rx="150" ry="20" className="fill-muted/30" />
+
+    {/* Lost character */}
+    <motion.g
+      animate={{ y: [0, -5, 0] }}
+      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+    >
+      {/* Body */}
+      <ellipse cx="200" cy="220" rx="35" ry="45" className="fill-primary/80" />
+      
+      {/* Head */}
+      <circle cx="200" cy="160" r="30" className="fill-primary" />
+      
+      {/* Eyes */}
+      <motion.g
+        animate={{ scaleY: [1, 0.1, 1] }}
+        transition={{ duration: 3, repeat: Infinity, repeatDelay: 2 }}
+      >
+        <circle cx="190" cy="155" r="5" className="fill-primary-foreground" />
+        <circle cx="210" cy="155" r="5" className="fill-primary-foreground" />
+        <circle cx="191" cy="154" r="2" className="fill-foreground" />
+        <circle cx="211" cy="154" r="2" className="fill-foreground" />
+      </motion.g>
+      
+      {/* Confused mouth */}
+      <path
+        d="M 190 172 Q 200 168 210 172"
+        fill="none"
+        stroke="hsl(var(--primary-foreground))"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      
+      {/* Question mark above head */}
+      <motion.g
+        animate={{ 
+          y: [0, -8, 0],
+          opacity: [1, 0.7, 1],
+          rotate: [-5, 5, -5]
+        }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+      >
+        <text
+          x="200"
+          y="115"
+          textAnchor="middle"
+          className="fill-accent text-3xl font-bold"
+          style={{ fontSize: "32px" }}
+        >
+          ?
+        </text>
+      </motion.g>
+
+      {/* Arms */}
+      <motion.path
+        d="M 165 200 Q 140 180 130 200"
+        fill="none"
+        className="stroke-primary"
+        strokeWidth="8"
+        strokeLinecap="round"
+        animate={{ rotate: [0, 10, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+        style={{ transformOrigin: "165px 200px" }}
+      />
+      <motion.path
+        d="M 235 200 Q 260 180 270 200"
+        fill="none"
+        className="stroke-primary"
+        strokeWidth="8"
+        strokeLinecap="round"
+        animate={{ rotate: [0, -10, 0] }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+        style={{ transformOrigin: "235px 200px" }}
+      />
+    </motion.g>
+
+    {/* Map/Paper floating */}
+    <motion.g
+      animate={{ 
+        y: [0, -10, 0],
+        rotate: [0, 5, -5, 0],
+        x: [0, 5, 0]
+      }}
+      transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+    >
+      <rect x="280" y="180" width="40" height="50" rx="3" className="fill-card stroke-border" strokeWidth="1" />
+      <line x1="288" y1="195" x2="312" y2="195" className="stroke-muted-foreground/50" strokeWidth="2" />
+      <line x1="288" y1="205" x2="308" y2="205" className="stroke-muted-foreground/50" strokeWidth="2" />
+      <line x1="288" y1="215" x2="310" y2="215" className="stroke-muted-foreground/50" strokeWidth="2" />
+    </motion.g>
+
+    {/* Compass spinning */}
+    <motion.g
+      animate={{ rotate: 360 }}
+      transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+      style={{ transformOrigin: "100px 200px" }}
+    >
+      <circle cx="100" cy="200" r="20" className="fill-card stroke-primary" strokeWidth="2" />
+      <motion.path
+        d="M 100 185 L 105 200 L 100 205 L 95 200 Z"
+        className="fill-accent"
+      />
+      <path
+        d="M 100 215 L 105 200 L 100 195 L 95 200 Z"
+        className="fill-muted-foreground/50"
+      />
+    </motion.g>
+
+    {/* Stars/sparkles */}
+    <motion.g
+      animate={{ opacity: [0.3, 1, 0.3], scale: [0.8, 1.2, 0.8] }}
+      transition={{ duration: 2, repeat: Infinity }}
+    >
+      <polygon points="50,150 52,156 58,156 53,160 55,166 50,162 45,166 47,160 42,156 48,156" className="fill-accent" />
+    </motion.g>
+    <motion.g
+      animate={{ opacity: [1, 0.3, 1], scale: [1, 0.8, 1] }}
+      transition={{ duration: 2.5, repeat: Infinity }}
+    >
+      <polygon points="350,140 352,146 358,146 353,150 355,156 350,152 345,156 347,150 342,146 348,146" className="fill-primary/60" />
+    </motion.g>
+    <motion.g
+      animate={{ opacity: [0.5, 1, 0.5], scale: [1, 1.3, 1] }}
+      transition={{ duration: 1.8, repeat: Infinity }}
+    >
+      <polygon points="320,220 321,224 325,224 322,227 323,231 320,228 317,231 318,227 315,224 319,224" className="fill-accent/70" />
+    </motion.g>
+  </svg>
+);
+
 const NotFound = () => {
   const location = useLocation();
 
@@ -23,48 +178,27 @@ const NotFound = () => {
 
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center px-4">
-        <div className="text-center max-w-lg">
-          {/* Animated 404 */}
+        <div className="text-center max-w-2xl">
+          {/* Animated SVG Illustration */}
           <motion.div
-            initial={{ scale: 0.5, opacity: 0 }}
+            initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5, type: "spring", stiffness: 100 }}
-            className="mb-8"
+            transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
+            className="mb-6"
           >
-            <div className="relative inline-block">
-              <motion.span
-                className="text-[150px] md:text-[200px] font-bold bg-gradient-to-br from-primary via-primary/70 to-accent bg-clip-text text-transparent leading-none"
-                animate={{ 
-                  backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                }}
-                transition={{ 
-                  duration: 5, 
-                  repeat: Infinity, 
-                  ease: "linear" 
-                }}
-                style={{ backgroundSize: "200% 200%" }}
-              >
-                404
-              </motion.span>
-              
-              {/* Floating elements */}
-              <motion.div
-                className="absolute -top-4 -right-4 w-8 h-8 rounded-full bg-primary/20"
-                animate={{ 
-                  y: [-5, 5, -5],
-                  rotate: [0, 180, 360]
-                }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              />
-              <motion.div
-                className="absolute -bottom-2 -left-6 w-6 h-6 rounded-full bg-accent/30"
-                animate={{ 
-                  y: [5, -5, 5],
-                  scale: [1, 1.2, 1]
-                }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-              />
-            </div>
+            <NotFoundIllustration />
+          </motion.div>
+
+          {/* 404 Text */}
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="mb-4"
+          >
+            <span className="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+              404
+            </span>
           </motion.div>
 
           {/* Message */}
