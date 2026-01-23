@@ -324,25 +324,20 @@ function FirebaseTestButton() {
     }
 
     try {
-      // Create a test patient
-      const testPatient = {
-        name: 'Paciente Teste',
-        email: 'teste@exemplo.com',
-        phone: '(11) 99999-9999',
-        birthDate: '1990-01-01',
-        status: 'active',
-        notes: 'Paciente de teste para validar conexão com Firebase',
-        createdAt: new Date().toISOString(),
+      // Create a test document in a special test collection
+      const testDoc = {
+        message: 'Teste de conexão Firebase',
+        timestamp: new Date().toISOString(),
       };
 
-      const docRef = await addDoc(collection(db, 'patients'), testPatient);
+      const docRef = await addDoc(collection(db, '_test_connection'), testDoc);
       
-      // Delete the test patient
-      await deleteDoc(doc(db, 'patients', docRef.id));
+      // Delete the test document immediately
+      await deleteDoc(doc(db, '_test_connection', docRef.id));
 
       setResult({ 
         success: true, 
-        message: `✅ Conexão OK! Paciente criado (ID: ${docRef.id}) e removido com sucesso.` 
+        message: `✅ Conexão OK! Documento criado e removido com sucesso.` 
       });
     } catch (error: any) {
       console.error('Firebase test error:', error);
