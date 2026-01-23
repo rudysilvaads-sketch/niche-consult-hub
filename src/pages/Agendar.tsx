@@ -1,7 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { format, addDays, isBefore, isToday, startOfDay } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Calendar, Clock, User, Mail, Phone, CheckCircle2, ArrowLeft, ArrowRight, Loader2 } from 'lucide-react';
+import { 
+  Calendar, Clock, User, Mail, Phone, CheckCircle2, ArrowLeft, ArrowRight, 
+  Loader2, MapPin, Video, Building, Star 
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { useApp } from '@/contexts/AppContext';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
+import { db, isFirebaseConfigured } from '@/lib/firebase';
+import { collection, getDocs, query, limit } from 'firebase/firestore';
+import { ProfessionalProfile, CATEGORY_LABELS, THERAPY_APPROACH_LABELS, TherapyApproach } from '@/types';
 
 // Validation schema
 const bookingSchema = z.object({
@@ -28,7 +34,7 @@ const TIME_SLOTS = [
   '14:00', '15:00', '16:00', '17:00', '18:00'
 ];
 
-const CONSULTATION_TYPES = [
+const DEFAULT_CONSULTATION_TYPES = [
   { id: 'primeira', label: 'Primeira Sessão', duration: 60 },
   { id: 'retorno', label: 'Sessão de Acompanhamento', duration: 50 },
   { id: 'avaliacao', label: 'Avaliação Inicial', duration: 90 },
@@ -53,6 +59,50 @@ const Agendar = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [bookingComplete, setBookingComplete] = useState(false);
   const [weekOffset, setWeekOffset] = useState(0);
+  
+  // Profile state
+  const [profile, setProfile] = useState<Partial<ProfessionalProfile> | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  // Load therapist profile
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!db || !isFirebaseConfigured) {
+        setIsLoadingProfile(false);
+        return;
+      }
+
+      try {
+        // Get the first profile (assuming single therapist)
+        const profilesRef = collection(db, 'profiles');
+        const q = query(profilesRef, limit(1));
+        const snapshot = await getDocs(q);
+        
+        if (!snapshot.empty) {
+          const profileData = snapshot.docs[0].data() as ProfessionalProfile;
+          setProfile(profileData);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    loadProfile();
+  }, []);
+
+  // Dynamic consultation types based on profile
+  const CONSULTATION_TYPES = useMemo(() => {
+    if (profile?.sessionDuration) {
+      return [
+        { id: 'primeira', label: 'Primeira Sessão', duration: profile.sessionDuration + 10 },
+        { id: 'retorno', label: 'Sessão de Acompanhamento', duration: profile.sessionDuration },
+        { id: 'avaliacao', label: 'Avaliação Inicial', duration: 90 },
+      ];
+    }
+    return DEFAULT_CONSULTATION_TYPES;
+  }, [profile]);
 
   // Generate next 14 days for selection
   const availableDates = useMemo(() => {
@@ -161,7 +211,7 @@ const Agendar = () => {
         time: selectedTime,
         duration: consultationType?.duration || 60,
         status: 'agendado',
-        type: consultationType?.label || 'Consulta',
+        type: consultationType?.label || 'Sessão',
         notes: formData.notes || 'Agendado online pelo paciente',
       });
       
@@ -186,25 +236,166 @@ const Agendar = () => {
     setWeekOffset(0);
   };
 
+  const getInitials = (name: string) => {
+    if (!name) return 'T';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  const formatPrice = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    }).format(value);
+  };
+
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
       {/* Header */}
       <header className="bg-card/80 backdrop-blur-lg border-b border-border/50 sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 py-4">
+        <div className="max-w-5xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-xl font-bold text-foreground">Espaço Terapêutico Online</h1>
-              <p className="text-sm text-muted-foreground">Agende sua sessão terapêutica</p>
+            <div className="flex items-center gap-3">
+              {profile?.photoUrl ? (
+                <img
+                  src={profile.photoUrl}
+                  alt={profile.name}
+                  className="h-10 w-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold">
+                  {getInitials(profile?.name || 'Terapeuta')}
+                </div>
+              )}
+              <div>
+                <h1 className="text-lg font-bold text-foreground">
+                  {profile?.clinicName || 'Espaço Terapêutico Online'}
+                </h1>
+                <p className="text-sm text-muted-foreground">Agendamento Online</p>
+              </div>
             </div>
-            <Badge variant="outline" className="gap-1">
+            <Badge variant="outline" className="gap-1 hidden sm:flex">
               <Calendar className="h-3 w-3" />
-              Agendamento Online
+              Agenda Aberta
             </Badge>
           </div>
         </div>
       </header>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        {/* Therapist Profile Card */}
+        {step === 'type' && profile && (
+          <Card className="card-elevated mb-8 overflow-hidden">
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent p-6">
+              <div className="flex flex-col md:flex-row gap-6">
+                {/* Photo */}
+                <div className="flex-shrink-0">
+                  {profile.photoUrl ? (
+                    <img
+                      src={profile.photoUrl}
+                      alt={profile.name}
+                      className="h-32 w-32 rounded-2xl object-cover border-4 border-background shadow-lg mx-auto md:mx-0"
+                    />
+                  ) : (
+                    <div className="h-32 w-32 rounded-2xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center text-primary-foreground text-4xl font-bold mx-auto md:mx-0">
+                      {getInitials(profile.name || '')}
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="flex-1 text-center md:text-left">
+                  <div className="flex items-center gap-2 justify-center md:justify-start mb-1">
+                    <h2 className="text-2xl font-bold text-foreground">{profile.name}</h2>
+                    <Star className="h-5 w-5 text-warning fill-warning" />
+                  </div>
+                  
+                  <p className="text-primary font-medium mb-2">
+                    {profile.category && CATEGORY_LABELS[profile.category]}
+                    {profile.registrationNumber && ` • ${profile.registrationNumber}`}
+                  </p>
+                  
+                  {profile.specialty && (
+                    <p className="text-muted-foreground mb-3">
+                      Especialista em {profile.specialty}
+                    </p>
+                  )}
+
+                  {/* Approaches */}
+                  {profile.approaches && profile.approaches.length > 0 && (
+                    <div className="flex flex-wrap gap-2 justify-center md:justify-start mb-4">
+                      {profile.approaches.slice(0, 4).map((approach) => (
+                        <Badge key={approach} variant="secondary" className="text-xs">
+                          {THERAPY_APPROACH_LABELS[approach as TherapyApproach]}
+                        </Badge>
+                      ))}
+                      {profile.approaches.length > 4 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{profile.approaches.length - 4}
+                        </Badge>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Service Info */}
+                  <div className="flex flex-wrap gap-4 justify-center md:justify-start text-sm">
+                    {profile.onlineService && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Video className="h-4 w-4 text-primary" />
+                        <span>Atendimento Online</span>
+                      </div>
+                    )}
+                    {profile.inPersonService && profile.clinicCity && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <MapPin className="h-4 w-4 text-primary" />
+                        <span>{profile.clinicCity}{profile.clinicState && `, ${profile.clinicState}`}</span>
+                      </div>
+                    )}
+                    {profile.sessionDuration && (
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <Clock className="h-4 w-4 text-primary" />
+                        <span>Sessão de {profile.sessionDuration} min</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Price Card */}
+                {profile.sessionPrice && (
+                  <div className="flex-shrink-0 text-center md:text-right">
+                    <div className="bg-background rounded-xl p-4 shadow-sm inline-block">
+                      <p className="text-sm text-muted-foreground mb-1">Valor da sessão</p>
+                      <p className="text-2xl font-bold text-primary">
+                        {formatPrice(profile.sessionPrice)}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Bio */}
+              {profile.bio && (
+                <div className="mt-6 pt-6 border-t border-border/50">
+                  <p className="text-muted-foreground leading-relaxed">
+                    {profile.bio}
+                  </p>
+                </div>
+              )}
+            </div>
+          </Card>
+        )}
+
         {/* Progress Steps */}
         {!bookingComplete && (
           <div className="flex items-center justify-center gap-2 mb-8">
@@ -239,7 +430,7 @@ const Agendar = () => {
         {step === 'type' && (
           <Card className="card-elevated">
             <CardHeader className="text-center">
-              <CardTitle>Tipo de Consulta</CardTitle>
+              <CardTitle>Tipo de Sessão</CardTitle>
               <CardDescription>Selecione o tipo de atendimento desejado</CardDescription>
             </CardHeader>
             <CardContent>
@@ -274,7 +465,7 @@ const Agendar = () => {
           <Card className="card-elevated">
             <CardHeader className="text-center">
               <CardTitle>Escolha a Data</CardTitle>
-              <CardDescription>Selecione o dia para sua consulta</CardDescription>
+              <CardDescription>Selecione o dia para sua sessão</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex items-center justify-between mb-4">
@@ -417,6 +608,11 @@ const Agendar = () => {
                   <Badge variant="secondary">
                     {CONSULTATION_TYPES.find(t => t.id === selectedType)?.label}
                   </Badge>
+                  {profile?.sessionPrice && (
+                    <Badge variant="outline" className="text-primary">
+                      {formatPrice(profile.sessionPrice)}
+                    </Badge>
+                  )}
                 </div>
               </div>
               
@@ -455,7 +651,7 @@ const Agendar = () => {
                 <div>
                   <Label htmlFor="phone" className="flex items-center gap-2">
                     <Phone className="h-4 w-4" />
-                    Telefone *
+                    Telefone/WhatsApp *
                   </Label>
                   <Input
                     id="phone"
@@ -473,9 +669,8 @@ const Agendar = () => {
                     id="notes"
                     value={formData.notes}
                     onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                    placeholder="Alguma informação adicional que deseja compartilhar..."
-                    className="mt-1"
-                    rows={3}
+                    placeholder="Descreva brevemente o motivo da consulta ou informações relevantes..."
+                    className="mt-1 min-h-[100px]"
                   />
                 </div>
                 
@@ -486,16 +681,20 @@ const Agendar = () => {
                 )}
               </div>
               
-              <div className="flex justify-between mt-6">
+              <div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
                 <Button variant="ghost" onClick={handleBack}>
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Voltar
                 </Button>
-                <Button onClick={handleSubmit} disabled={isSubmitting} className="btn-gradient">
+                <Button 
+                  className="btn-gradient" 
+                  onClick={handleSubmit}
+                  disabled={isSubmitting}
+                >
                   {isSubmitting ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Confirmando...
+                      Agendando...
                     </>
                   ) : (
                     'Confirmar Agendamento'
@@ -517,11 +716,17 @@ const Agendar = () => {
                 Agendamento Confirmado!
               </h2>
               <p className="text-muted-foreground mb-6">
-                Seu horário foi reservado com sucesso.
+                Sua sessão foi agendada com sucesso.
               </p>
               
               <div className="bg-muted/50 rounded-lg p-6 mb-6 max-w-md mx-auto">
                 <div className="space-y-3 text-left">
+                  {profile?.name && (
+                    <div className="flex items-center gap-3">
+                      <User className="h-5 w-5 text-primary" />
+                      <span className="text-foreground">com {profile.name}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-3">
                     <Calendar className="h-5 w-5 text-primary" />
                     <span className="text-foreground">
@@ -532,15 +737,12 @@ const Agendar = () => {
                     <Clock className="h-5 w-5 text-primary" />
                     <span className="text-foreground">{selectedTime}</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <User className="h-5 w-5 text-primary" />
-                    <span className="text-foreground">{formData.name}</span>
-                  </div>
                 </div>
               </div>
               
               <p className="text-sm text-muted-foreground mb-6">
                 Você receberá uma confirmação por email em breve.
+                {profile?.phone && ` Em caso de dúvidas, entre em contato: ${profile.phone}`}
               </p>
               
               <Button onClick={resetBooking} variant="outline">
@@ -553,9 +755,9 @@ const Agendar = () => {
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-auto">
-        <div className="max-w-4xl mx-auto px-4 py-6 text-center">
+        <div className="max-w-5xl mx-auto px-4 py-6 text-center">
           <p className="text-sm text-muted-foreground">
-            Sistema de agendamento online
+            {profile?.clinicName || 'Espaço Terapêutico Online'} • Sistema de agendamento online
           </p>
         </div>
       </footer>
