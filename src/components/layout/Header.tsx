@@ -44,12 +44,14 @@ export function Header({ title, subtitle, onNewAppointment }: HeaderProps) {
           variant="ghost" 
           size="icon" 
           onClick={toggleTheme}
-          className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-secondary"
+          className="relative h-9 w-9 text-muted-foreground hover:text-foreground hover:bg-secondary overflow-hidden"
         >
           <motion.div
-            initial={false}
-            animate={{ rotate: resolvedTheme === 'dark' ? 180 : 0 }}
-            transition={{ duration: 0.3 }}
+            key={resolvedTheme}
+            initial={{ y: -20, opacity: 0, rotate: -90 }}
+            animate={{ y: 0, opacity: 1, rotate: 0 }}
+            exit={{ y: 20, opacity: 0, rotate: 90 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
           >
             {resolvedTheme === 'dark' ? (
               <Moon className="h-[18px] w-[18px]" />
