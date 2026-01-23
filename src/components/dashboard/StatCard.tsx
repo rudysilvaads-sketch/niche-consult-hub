@@ -1,5 +1,6 @@
 import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { motion } from 'framer-motion';
 
 interface StatCardProps {
   title: string;
@@ -24,39 +25,59 @@ export function StatCard({
   trend,
 }: StatCardProps) {
   return (
-    <div className="stat-card group animate-slide-up">
+    <motion.div 
+      className="stat-card group"
+      whileHover={{ y: -2, boxShadow: 'var(--shadow-md)' }}
+      transition={{ duration: 0.2 }}
+    >
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <p className="text-sm text-muted-foreground font-medium">{title}</p>
           <div className="space-y-0.5">
-            <p className="text-3xl font-bold text-foreground tracking-tight tabular-nums">{value}</p>
+            <motion.p 
+              className="text-3xl font-bold text-foreground tracking-tight tabular-nums"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.1, duration: 0.3 }}
+            >
+              {value}
+            </motion.p>
             {subtitle && (
               <p className="text-xs text-muted-foreground">{subtitle}</p>
             )}
           </div>
           {trend && (
-            <div className={cn(
-              "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium",
-              trend.isPositive 
-                ? "bg-success/10 text-success" 
-                : "bg-destructive/10 text-destructive"
-            )}>
+            <motion.div 
+              className={cn(
+                "inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium",
+                trend.isPositive 
+                  ? "bg-success/10 text-success" 
+                  : "bg-destructive/10 text-destructive"
+              )}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+            >
               {trend.isPositive ? (
                 <TrendingUp className="h-3 w-3" />
               ) : (
                 <TrendingDown className="h-3 w-3" />
               )}
               <span>{Math.abs(trend.value)}%</span>
-            </div>
+            </motion.div>
           )}
         </div>
-        <div className={cn(
-          'h-12 w-12 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105',
-          iconBgColor
-        )}>
+        <motion.div 
+          className={cn(
+            'h-12 w-12 rounded-xl flex items-center justify-center shrink-0',
+            iconBgColor
+          )}
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          transition={{ duration: 0.2 }}
+        >
           <Icon className={cn('h-6 w-6', iconColor)} />
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }
