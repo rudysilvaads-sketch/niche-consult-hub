@@ -486,6 +486,34 @@ const VideoRoom = () => {
               {isVideoOff ? <VideoOff className="h-5 w-5 sm:h-6 sm:w-6" /> : <Video className="h-5 w-5 sm:h-6 sm:w-6" />}
             </Button>
 
+            {/* Transcription toggle button */}
+            <Button
+              size="lg"
+              variant={isListening ? 'default' : transcriptionError ? 'destructive' : 'secondary'}
+              onClick={async () => {
+                if (isListening) {
+                  stopListening();
+                  toast.info('Transcrição pausada');
+                } else {
+                  try {
+                    await startListening();
+                    toast.success('Transcrição reativada');
+                  } catch {
+                    toast.error('Erro ao reativar transcrição');
+                  }
+                }
+              }}
+              className="rounded-full w-12 h-12 sm:w-14 sm:h-14"
+              disabled={!hasStartedCall}
+              title={isListening ? 'Pausar transcrição' : 'Reativar transcrição'}
+            >
+              {isListening ? (
+                <FileText className="h-5 w-5 sm:h-6 sm:w-6" />
+              ) : (
+                <MessageSquare className="h-5 w-5 sm:h-6 sm:w-6" />
+              )}
+            </Button>
+
             <Button
               size="lg"
               variant={showTranscript ? 'default' : 'secondary'}
