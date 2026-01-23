@@ -9,6 +9,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Stethoscope,
+  DollarSign,
+  FileCheck,
+  BarChart3,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +20,9 @@ const menuItems = [
   { icon: Calendar, label: 'Agenda', path: '/agenda' },
   { icon: Users, label: 'Pacientes', path: '/pacientes' },
   { icon: FileText, label: 'Prontuários', path: '/prontuarios' },
+  { icon: DollarSign, label: 'Financeiro', path: '/financeiro' },
+  { icon: FileCheck, label: 'Documentos', path: '/documentos' },
+  { icon: BarChart3, label: 'Relatórios', path: '/relatorios' },
   { icon: Settings, label: 'Configurações', path: '/configuracoes' },
 ];
 

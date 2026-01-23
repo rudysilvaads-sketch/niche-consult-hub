@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Users, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { Users, Calendar, CheckCircle, Clock, DollarSign, TrendingUp, AlertCircle } from 'lucide-react';
 import { MainLayout } from '@/components/layout/MainLayout';
 import { Header } from '@/components/layout/Header';
 import { StatCard } from '@/components/dashboard/StatCard';
@@ -16,7 +16,7 @@ const Index = () => {
   const { patients, appointments, stats, addAppointment, updateAppointment } = useApp();
 
   const todayAppointments = appointments.filter(
-    (apt) => apt.status !== 'concluido' && apt.status !== 'cancelado'
+    (apt) => apt.date === new Date().toISOString().split('T')[0] && apt.status !== 'concluido' && apt.status !== 'cancelado'
   ).slice(0, 4);
 
   const handleSaveAppointment = (appointment: Partial<Appointment>) => {
@@ -27,6 +27,14 @@ const Index = () => {
   const handleUpdateStatus = (id: string, status: Appointment['status']) => {
     updateAppointment(id, { status });
     toast.success('Status atualizado!');
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 0,
+    }).format(value);
   };
 
   return (
@@ -66,6 +74,42 @@ const Index = () => {
           icon={Clock}
           iconColor="text-warning"
         />
+      </div>
+
+      {/* Financial Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="card-elevated p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center">
+              <TrendingUp className="h-6 w-6 text-success" />
+            </div>
+            <span className="badge-status bg-success/10 text-success">Este mês</span>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Receitas</p>
+          <p className="text-2xl font-bold text-success">{formatCurrency(stats.monthRevenue)}</p>
+        </div>
+
+        <div className="card-elevated p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <DollarSign className="h-6 w-6 text-primary" />
+            </div>
+            <span className="badge-status bg-primary/10 text-primary">Lucro</span>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">Saldo do Mês</p>
+          <p className="text-2xl font-bold text-primary">{formatCurrency(stats.monthRevenue - stats.monthExpenses)}</p>
+        </div>
+
+        <div className="card-elevated p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center">
+              <AlertCircle className="h-6 w-6 text-warning" />
+            </div>
+            <span className="badge-status bg-warning/10 text-warning">Pendente</span>
+          </div>
+          <p className="text-sm text-muted-foreground mb-1">A Receber</p>
+          <p className="text-2xl font-bold text-warning">{formatCurrency(stats.pendingPayments)}</p>
+        </div>
       </div>
 
       {/* Main Content Grid */}
