@@ -6,29 +6,29 @@
 
 @layer base {
   :root {
-    /* Professional Healthcare Palette */
-    --background: 40 33% 98%;
-    --foreground: 215 25% 17%;
+    /* Professional Purple/Lilac Palette - Espaço Terapêutico */
+    --background: 270 20% 98%;
+    --foreground: 270 25% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 215 25% 17%;
+    --card-foreground: 270 25% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 215 25% 17%;
+    --popover-foreground: 270 25% 15%;
 
-    /* Teal primary - professional, calming */
-    --primary: 173 58% 39%;
+    /* Purple primary - professional, calming, spiritual */
+    --primary: 271 69% 49%;
     --primary-foreground: 0 0% 100%;
 
-    /* Warm secondary */
-    --secondary: 40 33% 96%;
-    --secondary-foreground: 215 25% 27%;
+    /* Soft lavender secondary */
+    --secondary: 270 30% 96%;
+    --secondary-foreground: 270 25% 25%;
 
-    --muted: 40 20% 94%;
-    --muted-foreground: 215 15% 50%;
+    --muted: 270 15% 94%;
+    --muted-foreground: 270 12% 50%;
 
-    /* Coral accent - friendly, approachable */
-    --accent: 12 76% 61%;
+    /* Lilac accent - gentle, approachable */
+    --accent: 280 60% 65%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 72% 51%;
@@ -42,26 +42,26 @@
     --warning: 38 92% 50%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 214 20% 90%;
-    --input: 214 20% 90%;
-    --ring: 173 58% 39%;
+    --border: 270 15% 90%;
+    --input: 270 15% 90%;
+    --ring: 271 69% 49%;
 
     --radius: 0.75rem;
 
-    /* Sidebar - slightly tinted */
-    --sidebar-background: 173 25% 97%;
-    --sidebar-foreground: 215 25% 27%;
-    --sidebar-primary: 173 58% 39%;
+    /* Sidebar - purple tinted */
+    --sidebar-background: 270 25% 97%;
+    --sidebar-foreground: 270 25% 25%;
+    --sidebar-primary: 271 69% 49%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 173 30% 94%;
-    --sidebar-accent-foreground: 215 25% 17%;
-    --sidebar-border: 173 15% 90%;
-    --sidebar-ring: 173 58% 39%;
+    --sidebar-accent: 270 30% 94%;
+    --sidebar-accent-foreground: 270 25% 15%;
+    --sidebar-border: 270 15% 90%;
+    --sidebar-ring: 271 69% 49%;
 
-    /* Custom gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(173 58% 39%) 0%, hsl(180 50% 45%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(12 76% 61%) 0%, hsl(25 85% 55%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(40 33% 99%) 100%);
+    /* Custom gradients - Purple theme */
+    --gradient-primary: linear-gradient(135deg, hsl(271 69% 49%) 0%, hsl(280 60% 55%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(280 60% 65%) 0%, hsl(290 55% 60%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(270 20% 99%) 100%);
 
     /* Shadows */
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.03);
@@ -71,25 +71,25 @@
   }
 
   .dark {
-    --background: 215 30% 10%;
-    --foreground: 40 20% 95%;
+    --background: 270 30% 8%;
+    --foreground: 270 15% 95%;
 
-    --card: 215 28% 13%;
-    --card-foreground: 40 20% 95%;
+    --card: 270 28% 12%;
+    --card-foreground: 270 15% 95%;
 
-    --popover: 215 28% 13%;
-    --popover-foreground: 40 20% 95%;
+    --popover: 270 28% 12%;
+    --popover-foreground: 270 15% 95%;
 
-    --primary: 173 58% 45%;
+    --primary: 271 65% 55%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 215 25% 18%;
-    --secondary-foreground: 40 20% 90%;
+    --secondary: 270 25% 18%;
+    --secondary-foreground: 270 15% 90%;
 
-    --muted: 215 25% 20%;
-    --muted-foreground: 215 15% 60%;
+    --muted: 270 25% 20%;
+    --muted-foreground: 270 12% 60%;
 
-    --accent: 12 76% 55%;
+    --accent: 280 55% 60%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 50%;
@@ -101,18 +101,18 @@
     --warning: 38 85% 55%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 215 25% 22%;
-    --input: 215 25% 22%;
-    --ring: 173 58% 45%;
+    --border: 270 25% 22%;
+    --input: 270 25% 22%;
+    --ring: 271 65% 55%;
 
-    --sidebar-background: 215 30% 8%;
-    --sidebar-foreground: 40 20% 90%;
-    --sidebar-primary: 173 58% 45%;
+    --sidebar-background: 270 30% 7%;
+    --sidebar-foreground: 270 15% 90%;
+    --sidebar-primary: 271 65% 55%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 215 25% 15%;
-    --sidebar-accent-foreground: 40 20% 95%;
-    --sidebar-border: 215 25% 18%;
-    --sidebar-ring: 173 58% 45%;
+    --sidebar-accent: 270 25% 15%;
+    --sidebar-accent-foreground: 270 15% 95%;
+    --sidebar-border: 270 25% 18%;
+    --sidebar-ring: 271 65% 55%;
   }
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { UserPlus, ArrowRight, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { ArrowRight, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useValidateRegistrationLink } from '@/hooks/useRegistrationLinks';
 import { useApp } from '@/contexts/AppContext';
 import { RegistrationLink } from '@/types/telehealth';
+import { Branding } from '@/components/branding/Branding';
 
 const Cadastro = () => {
   const { token } = useParams<{ token: string }>();
@@ -169,9 +170,7 @@ const Cadastro = () => {
     <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center p-4">
       <Card className="w-full max-w-lg">
         <CardHeader className="text-center">
-          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <UserPlus className="h-8 w-8 text-primary" />
-          </div>
+          <Branding variant="full" size="md" className="justify-center mb-4" />
           <CardTitle className="text-2xl">Cadastro de Paciente</CardTitle>
           <CardDescription>
             Preencha seus dados para se cadastrar e poder agendar consultas
