@@ -154,74 +154,74 @@ const Financeiro = () => {
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-        <div className="card-elevated p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Receitas do Mês</p>
-              <p className="text-2xl font-bold text-success mt-1">{formatCurrency(stats.monthRevenue)}</p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        <div className="card-elevated p-3 sm:p-6">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Receitas do Mês</p>
+              <p className="text-lg sm:text-2xl font-bold text-success mt-1 truncate">{formatCurrency(stats.monthRevenue)}</p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-success/10 flex items-center justify-center">
-              <TrendingUp className="h-6 w-6 text-success" />
-            </div>
-          </div>
-        </div>
-
-        <div className="card-elevated p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Despesas do Mês</p>
-              <p className="text-2xl font-bold text-destructive mt-1">{formatCurrency(stats.monthExpenses)}</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
-              <TrendingDown className="h-6 w-6 text-destructive" />
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
+              <TrendingUp className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
             </div>
           </div>
         </div>
 
-        <div className="card-elevated p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Lucro do Mês</p>
-              <p className="text-2xl font-bold text-primary mt-1">{formatCurrency(stats.monthRevenue - stats.monthExpenses)}</p>
+        <div className="card-elevated p-3 sm:p-6">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Despesas do Mês</p>
+              <p className="text-lg sm:text-2xl font-bold text-destructive mt-1 truncate">{formatCurrency(stats.monthExpenses)}</p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <DollarSign className="h-6 w-6 text-primary" />
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+              <TrendingDown className="h-5 w-5 sm:h-6 sm:w-6 text-destructive" />
             </div>
           </div>
         </div>
 
-        <div className="card-elevated p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-muted-foreground">Pagamentos Pendentes</p>
-              <p className="text-2xl font-bold text-warning mt-1">{formatCurrency(stats.pendingPayments)}</p>
+        <div className="card-elevated p-3 sm:p-6">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Lucro do Mês</p>
+              <p className="text-lg sm:text-2xl font-bold text-primary mt-1 truncate">{formatCurrency(stats.monthRevenue - stats.monthExpenses)}</p>
             </div>
-            <div className="h-12 w-12 rounded-full bg-warning/10 flex items-center justify-center">
-              <CreditCard className="h-6 w-6 text-warning" />
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+              <DollarSign className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+            </div>
+          </div>
+        </div>
+
+        <div className="card-elevated p-3 sm:p-6">
+          <div className="flex items-center justify-between gap-2">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm text-muted-foreground truncate">Pendentes</p>
+              <p className="text-lg sm:text-2xl font-bold text-warning mt-1 truncate">{formatCurrency(stats.pendingPayments)}</p>
+            </div>
+            <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-warning/10 flex items-center justify-center flex-shrink-0">
+              <CreditCard className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
             </div>
           </div>
         </div>
       </div>
 
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <TabsList className="bg-muted/50">
-            <TabsTrigger value="transacoes" className="gap-2">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col gap-4">
+          <TabsList className="bg-muted/50 w-full sm:w-auto">
+            <TabsTrigger value="transacoes" className="gap-2 flex-1 sm:flex-none">
               <Receipt className="h-4 w-4" />
-              Transações
+              <span className="hidden xs:inline">Transações</span>
             </TabsTrigger>
-            <TabsTrigger value="pacotes" className="gap-2">
+            <TabsTrigger value="pacotes" className="gap-2 flex-1 sm:flex-none">
               <Package className="h-4 w-4" />
-              Pacotes
+              <span className="hidden xs:inline">Pacotes</span>
             </TabsTrigger>
           </TabsList>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
             {activeTab === 'transacoes' && (
               <>
-                <div className="relative w-64">
+                <div className="relative w-full sm:w-64">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Buscar transação..."
@@ -230,18 +230,20 @@ const Financeiro = () => {
                     className="pl-10 input-styled"
                   />
                 </div>
-                <Button onClick={handleNewReceita} className="bg-success hover:bg-success/90 gap-2">
-                  <ArrowUpCircle className="h-4 w-4" />
-                  Receita
-                </Button>
-                <Button onClick={handleNewDespesa} variant="destructive" className="gap-2">
-                  <ArrowDownCircle className="h-4 w-4" />
-                  Despesa
-                </Button>
+                <div className="flex gap-2">
+                  <Button onClick={handleNewReceita} className="bg-success hover:bg-success/90 gap-2 flex-1 sm:flex-none text-sm">
+                    <ArrowUpCircle className="h-4 w-4" />
+                    <span className="hidden xs:inline">Receita</span>
+                  </Button>
+                  <Button onClick={handleNewDespesa} variant="destructive" className="gap-2 flex-1 sm:flex-none text-sm">
+                    <ArrowDownCircle className="h-4 w-4" />
+                    <span className="hidden xs:inline">Despesa</span>
+                  </Button>
+                </div>
               </>
             )}
             {activeTab === 'pacotes' && (
-              <Button onClick={handleNewPackage} className="btn-gradient gap-2">
+              <Button onClick={handleNewPackage} className="btn-gradient gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
                 Novo Pacote
               </Button>
@@ -252,44 +254,46 @@ const Financeiro = () => {
         <TabsContent value="transacoes" className="space-y-4">
           {/* Receitas */}
           <div className="card-elevated">
-            <div className="p-4 border-b border-border">
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <ArrowUpCircle className="h-5 w-5 text-success" />
+            <div className="p-3 sm:p-4 border-b border-border">
+              <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm sm:text-base">
+                <ArrowUpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
                 Receitas ({receitas.length})
               </h3>
             </div>
             <div className="divide-y divide-border">
               {receitas.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">
+                <div className="p-6 sm:p-8 text-center text-muted-foreground text-sm">
                   Nenhuma receita encontrada
                 </div>
               ) : (
                 receitas.map((transaction) => (
-                  <div key={transaction.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
-                        <ArrowUpCircle className="h-5 w-5 text-success" />
+                  <div key={transaction.id} className="p-3 sm:p-4 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-success/10 flex items-center justify-center flex-shrink-0">
+                          <ArrowUpCircle className="h-4 w-4 sm:h-5 sm:w-5 text-success" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-foreground text-sm sm:text-base truncate">{transaction.description}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                            {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                            <span className="hidden sm:inline"> • {TRANSACTION_CATEGORY_LABELS[transaction.category]}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-foreground">{transaction.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(transaction.date).toLocaleDateString('pt-BR')} • {TRANSACTION_CATEGORY_LABELS[transaction.category]}
-                          {transaction.paymentMethod && ` • ${PAYMENT_METHOD_LABELS[transaction.paymentMethod]}`}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className={`badge-status ${getStatusColor(transaction.status)}`}>
-                        {PAYMENT_STATUS_LABELS[transaction.status]}
-                      </span>
-                      <span className="font-bold text-success">{formatCurrency(transaction.value)}</span>
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTransaction(transaction)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteTransaction(transaction)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 flex-shrink-0">
+                        <span className={`badge-status text-xs ${getStatusColor(transaction.status)}`}>
+                          {PAYMENT_STATUS_LABELS[transaction.status]}
+                        </span>
+                        <span className="font-bold text-success text-sm sm:text-base whitespace-nowrap">{formatCurrency(transaction.value)}</span>
+                        <div className="hidden sm:flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTransaction(transaction)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteTransaction(transaction)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -300,44 +304,46 @@ const Financeiro = () => {
 
           {/* Despesas */}
           <div className="card-elevated">
-            <div className="p-4 border-b border-border">
-              <h3 className="font-semibold text-foreground flex items-center gap-2">
-                <ArrowDownCircle className="h-5 w-5 text-destructive" />
+            <div className="p-3 sm:p-4 border-b border-border">
+              <h3 className="font-semibold text-foreground flex items-center gap-2 text-sm sm:text-base">
+                <ArrowDownCircle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
                 Despesas ({despesas.length})
               </h3>
             </div>
             <div className="divide-y divide-border">
               {despesas.length === 0 ? (
-                <div className="p-8 text-center text-muted-foreground">
+                <div className="p-6 sm:p-8 text-center text-muted-foreground text-sm">
                   Nenhuma despesa encontrada
                 </div>
               ) : (
                 despesas.map((transaction) => (
-                  <div key={transaction.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors">
-                    <div className="flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-full bg-destructive/10 flex items-center justify-center">
-                        <ArrowDownCircle className="h-5 w-5 text-destructive" />
+                  <div key={transaction.id} className="p-3 sm:p-4 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-start sm:items-center justify-between gap-3">
+                      <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                        <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-destructive/10 flex items-center justify-center flex-shrink-0">
+                          <ArrowDownCircle className="h-4 w-4 sm:h-5 sm:w-5 text-destructive" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-medium text-foreground text-sm sm:text-base truncate">{transaction.description}</p>
+                          <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                            {new Date(transaction.date).toLocaleDateString('pt-BR')}
+                            <span className="hidden sm:inline"> • {TRANSACTION_CATEGORY_LABELS[transaction.category]}</span>
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-foreground">{transaction.description}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(transaction.date).toLocaleDateString('pt-BR')} • {TRANSACTION_CATEGORY_LABELS[transaction.category]}
-                          {transaction.paymentMethod && ` • ${PAYMENT_METHOD_LABELS[transaction.paymentMethod]}`}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className={`badge-status ${getStatusColor(transaction.status)}`}>
-                        {PAYMENT_STATUS_LABELS[transaction.status]}
-                      </span>
-                      <span className="font-bold text-destructive">-{formatCurrency(transaction.value)}</span>
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTransaction(transaction)}>
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteTransaction(transaction)}>
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 flex-shrink-0">
+                        <span className={`badge-status text-xs ${getStatusColor(transaction.status)}`}>
+                          {PAYMENT_STATUS_LABELS[transaction.status]}
+                        </span>
+                        <span className="font-bold text-destructive text-sm sm:text-base whitespace-nowrap">-{formatCurrency(transaction.value)}</span>
+                        <div className="hidden sm:flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditTransaction(transaction)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteTransaction(transaction)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>

@@ -133,57 +133,57 @@ const Documentos = () => {
       />
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+      <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-4 mb-6 sm:mb-8">
         <Button 
           variant="outline" 
-          className="h-auto p-4 flex flex-col items-center gap-2 hover:border-success hover:bg-success/5"
+          className="h-auto p-3 sm:p-4 flex flex-col items-center gap-1 sm:gap-2 hover:border-success hover:bg-success/5"
           onClick={() => handleNewDocument('recibo')}
         >
-          <Receipt className="h-6 w-6 text-success" />
-          <span className="text-sm font-medium">Recibo</span>
+          <Receipt className="h-5 w-5 sm:h-6 sm:w-6 text-success" />
+          <span className="text-xs sm:text-sm font-medium">Recibo</span>
         </Button>
         <Button 
           variant="outline" 
-          className="h-auto p-4 flex flex-col items-center gap-2 hover:border-primary hover:bg-primary/5"
+          className="h-auto p-3 sm:p-4 flex flex-col items-center gap-1 sm:gap-2 hover:border-primary hover:bg-primary/5"
           onClick={() => handleNewDocument('atestado')}
         >
-          <FileCheck className="h-6 w-6 text-primary" />
-          <span className="text-sm font-medium">Atestado</span>
+          <FileCheck className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
+          <span className="text-xs sm:text-sm font-medium">Atestado</span>
         </Button>
         <Button 
           variant="outline" 
-          className="h-auto p-4 flex flex-col items-center gap-2 hover:border-warning hover:bg-warning/5"
+          className="h-auto p-3 sm:p-4 flex flex-col items-center gap-1 sm:gap-2 hover:border-warning hover:bg-warning/5"
           onClick={() => handleNewDocument('declaracao')}
         >
-          <FileWarning className="h-6 w-6 text-warning" />
-          <span className="text-sm font-medium">Declaração</span>
+          <FileWarning className="h-5 w-5 sm:h-6 sm:w-6 text-warning" />
+          <span className="text-xs sm:text-sm font-medium truncate">Declaração</span>
         </Button>
         <Button 
           variant="outline" 
-          className="h-auto p-4 flex flex-col items-center gap-2 hover:border-accent hover:bg-accent/5"
+          className="h-auto p-3 sm:p-4 flex flex-col items-center gap-1 sm:gap-2 hover:border-accent hover:bg-accent/5 hidden sm:flex"
           onClick={() => handleNewDocument('relatorio')}
         >
-          <ClipboardList className="h-6 w-6 text-accent" />
-          <span className="text-sm font-medium">Relatório</span>
+          <ClipboardList className="h-5 w-5 sm:h-6 sm:w-6 text-accent" />
+          <span className="text-xs sm:text-sm font-medium">Relatório</span>
         </Button>
         <Button 
           variant="outline" 
-          className="h-auto p-4 flex flex-col items-center gap-2 hover:border-destructive hover:bg-destructive/5"
+          className="h-auto p-3 sm:p-4 flex flex-col items-center gap-1 sm:gap-2 hover:border-destructive hover:bg-destructive/5 hidden sm:flex"
           onClick={() => handleNewDocument('receituario')}
         >
-          <Pill className="h-6 w-6 text-destructive" />
-          <span className="text-sm font-medium">Receituário</span>
+          <Pill className="h-5 w-5 sm:h-6 sm:w-6 text-destructive" />
+          <span className="text-xs sm:text-sm font-medium">Receituário</span>
         </Button>
       </div>
 
       {/* Tabs & Search */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full sm:w-auto">
-          <TabsList className="bg-muted/50 flex-wrap h-auto">
-            <TabsTrigger value="todos">Todos ({documentCounts.todos})</TabsTrigger>
-            <TabsTrigger value="recibo">Recibos ({documentCounts.recibo})</TabsTrigger>
-            <TabsTrigger value="atestado">Atestados ({documentCounts.atestado})</TabsTrigger>
-            <TabsTrigger value="declaracao">Declarações ({documentCounts.declaracao})</TabsTrigger>
+      <div className="flex flex-col gap-4 mb-6">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="w-full">
+          <TabsList className="bg-muted/50 w-full sm:w-auto grid grid-cols-4 sm:flex h-auto">
+            <TabsTrigger value="todos" className="text-xs sm:text-sm py-2">Todos</TabsTrigger>
+            <TabsTrigger value="recibo" className="text-xs sm:text-sm py-2">Recibos</TabsTrigger>
+            <TabsTrigger value="atestado" className="text-xs sm:text-sm py-2">Atestados</TabsTrigger>
+            <TabsTrigger value="declaracao" className="text-xs sm:text-sm py-2 hidden sm:flex">Declarações</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -202,43 +202,45 @@ const Documentos = () => {
       <div className="card-elevated">
         <div className="divide-y divide-border">
           {filteredDocuments.length === 0 ? (
-            <div className="p-12 text-center">
-              <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-semibold text-foreground mb-2">Nenhum documento encontrado</h3>
-              <p className="text-muted-foreground text-sm">Use os botões acima para criar um novo documento.</p>
+            <div className="p-8 sm:p-12 text-center">
+              <FileText className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="font-semibold text-foreground mb-2 text-sm sm:text-base">Nenhum documento encontrado</h3>
+              <p className="text-muted-foreground text-xs sm:text-sm">Use os botões acima para criar um novo documento.</p>
             </div>
           ) : (
             filteredDocuments.map((doc) => {
               const Icon = getDocumentIcon(doc.type);
               return (
-                <div key={doc.id} className="p-4 flex items-center justify-between hover:bg-muted/30 transition-colors animate-slide-up">
-                  <div className="flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded-lg flex items-center justify-center ${getDocumentColor(doc.type)}`}>
-                      <Icon className="h-6 w-6" />
+                <div key={doc.id} className="p-3 sm:p-4 hover:bg-muted/30 transition-colors animate-slide-up">
+                  <div className="flex items-start sm:items-center justify-between gap-3">
+                    <div className="flex items-start sm:items-center gap-3 min-w-0 flex-1">
+                      <div className={`h-10 w-10 sm:h-12 sm:w-12 rounded-lg flex items-center justify-center flex-shrink-0 ${getDocumentColor(doc.type)}`}>
+                        <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h4 className="font-medium text-foreground text-sm sm:text-base truncate">{doc.title}</h4>
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                          {doc.patientName} • {new Date(doc.date).toLocaleDateString('pt-BR')}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h4 className="font-medium text-foreground">{doc.title}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        {doc.patientName} • {new Date(doc.date).toLocaleDateString('pt-BR')}
-                      </p>
+                    <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+                      <span className={`badge-status text-xs hidden sm:inline-flex ${getDocumentColor(doc.type)}`}>
+                        {DOCUMENT_TYPE_LABELS[doc.type]}
+                      </span>
+                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewDocument(doc)}>
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 hidden sm:flex" onClick={() => handleEditDocument(doc)}>
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 hidden sm:flex" onClick={() => toast.success('Download iniciado!')}>
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hidden sm:flex" onClick={() => handleDeleteClick(doc)}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`badge-status ${getDocumentColor(doc.type)}`}>
-                      {DOCUMENT_TYPE_LABELS[doc.type]}
-                    </span>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleViewDocument(doc)}>
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleEditDocument(doc)}>
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => toast.success('Download iniciado!')}>
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive" onClick={() => handleDeleteClick(doc)}>
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
                   </div>
                 </div>
               );

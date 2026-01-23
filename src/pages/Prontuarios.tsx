@@ -84,8 +84,8 @@ const Prontuarios = () => {
       />
 
       {/* Actions Bar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-        <div className="relative w-full sm:w-96">
+      <div className="flex flex-col gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
             placeholder="Buscar por paciente ou diagnóstico..."
@@ -95,40 +95,40 @@ const Prontuarios = () => {
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
+        <div className="flex items-center justify-between sm:justify-end gap-2 sm:gap-3">
+          <Button variant="outline" className="gap-2 text-sm flex-1 sm:flex-none">
             <Filter className="h-4 w-4" />
-            Filtros
+            <span className="hidden xs:inline">Filtros</span>
           </Button>
-          <Button onClick={handleNewRecord} className="btn-gradient gap-2">
+          <Button onClick={handleNewRecord} className="btn-gradient gap-2 text-sm flex-1 sm:flex-none">
             <Plus className="h-4 w-4" />
-            Novo Prontuário
+            <span>Novo Prontuário</span>
           </Button>
         </div>
       </div>
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="card-elevated p-4">
-          <p className="text-sm text-muted-foreground">Total de Registros</p>
-          <p className="text-2xl font-bold text-foreground mt-1">{records.length}</p>
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <div className="card-elevated p-3 sm:p-4">
+          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">Total</p>
+          <p className="text-lg sm:text-2xl font-bold text-foreground mt-0.5 sm:mt-1">{records.length}</p>
         </div>
-        <div className="card-elevated p-4">
-          <p className="text-sm text-muted-foreground">Este mês</p>
-          <p className="text-2xl font-bold text-success mt-1">+{records.length}</p>
+        <div className="card-elevated p-3 sm:p-4">
+          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">Este mês</p>
+          <p className="text-lg sm:text-2xl font-bold text-success mt-0.5 sm:mt-1">+{records.length}</p>
         </div>
-        <div className="card-elevated p-4">
-          <p className="text-sm text-muted-foreground">Pacientes atendidos</p>
-          <p className="text-2xl font-bold text-primary mt-1">{uniquePatients}</p>
+        <div className="card-elevated p-3 sm:p-4">
+          <p className="text-[10px] sm:text-sm text-muted-foreground truncate">Pacientes</p>
+          <p className="text-lg sm:text-2xl font-bold text-primary mt-0.5 sm:mt-1">{uniquePatients}</p>
         </div>
       </div>
 
       {/* Records Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-6">
         {filteredRecords.length === 0 ? (
-          <div className="col-span-full card-elevated p-12 text-center">
-            <p className="text-muted-foreground">Nenhum prontuário encontrado</p>
-            <Button onClick={handleNewRecord} className="btn-gradient mt-4">
+          <div className="col-span-full card-elevated p-8 sm:p-12 text-center">
+            <p className="text-muted-foreground text-sm">Nenhum prontuário encontrado</p>
+            <Button onClick={handleNewRecord} className="btn-gradient mt-4 text-sm">
               <Plus className="h-4 w-4 mr-2" />
               Criar Primeiro Prontuário
             </Button>
