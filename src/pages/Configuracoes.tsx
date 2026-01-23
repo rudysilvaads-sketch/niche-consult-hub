@@ -28,6 +28,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { useTheme } from '@/contexts/ThemeContext';
+import { NotificationSettings } from '@/components/notifications/NotificationSettings';
 
 const tabs = [
   { id: 'profile', label: 'Perfil', icon: User },
@@ -841,7 +842,13 @@ const Configuracoes = () => {
                 </p>
               </div>
 
+              {/* Push Notifications Component */}
+              <NotificationSettings />
+
+              {/* Email/SMS Notifications */}
               <div className="space-y-4">
+                <h3 className="font-medium text-foreground">Outras Notificações</h3>
+                
                 <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/50">
                   <div>
                     <p className="font-medium text-foreground">Lembretes por E-mail</p>
