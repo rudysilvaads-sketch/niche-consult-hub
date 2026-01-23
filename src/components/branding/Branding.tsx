@@ -50,39 +50,39 @@ export const BRAND = {
   tagline: 'Gestão para Terapeutas e Psicólogos',
   email: 'contato@espacoterapeutico.com.br',
   website: 'www.espacoterapeutico.com.br',
-  primaryColor: '#7c3aed', // Purple
-  accentColor: '#a855f7', // Lilac
+  primaryColor: '#5b21b6', // Deep Indigo Purple
+  accentColor: '#a78bfa', // Soft Lilac
 };
 
 // Email template helper
 export function getEmailTemplate(type: 'welcome' | 'appointment' | 'reminder' | 'session') {
   const baseStyles = `
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #faf5ff;
+    background-color: #1e1b4b;
     padding: 40px 20px;
   `;
 
   const headerStyles = `
-    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    background: linear-gradient(135deg, #5b21b6 0%, #7c3aed 50%, #a78bfa 100%);
     padding: 30px;
     text-align: center;
-    border-radius: 12px 12px 0 0;
+    border-radius: 16px 16px 0 0;
   `;
 
   const bodyStyles = `
     background-color: #ffffff;
     padding: 40px 30px;
-    border-radius: 0 0 12px 12px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
   `;
 
   const buttonStyles = `
     display: inline-block;
-    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
-    color: #ffffff;
+    background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 100%);
+    color: #1e1b4b;
     padding: 14px 32px;
     text-decoration: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
     margin: 20px 0;
   `;
@@ -90,7 +90,7 @@ export function getEmailTemplate(type: 'welcome' | 'appointment' | 'reminder' | 
   const footerStyles = `
     text-align: center;
     padding: 20px;
-    color: #6b7280;
+    color: rgba(255,255,255,0.6);
     font-size: 12px;
   `;
 
@@ -114,11 +114,11 @@ export function getEmailTemplate(type: 'welcome' | 'appointment' | 'reminder' | 
       </p>
     `,
     footerHtml: `
-      <p style="margin: 0 0 10px;">
+      <p style="margin: 0 0 10px; color: rgba(255,255,255,0.7);">
         ${BRAND.name}<br>
-        <a href="mailto:${BRAND.email}" style="color: #7c3aed;">${BRAND.email}</a>
+        <a href="mailto:${BRAND.email}" style="color: #a78bfa;">${BRAND.email}</a>
       </p>
-      <p style="margin: 0; color: #9ca3af; font-size: 11px;">
+      <p style="margin: 0; color: rgba(255,255,255,0.5); font-size: 11px;">
         Este é um email automático. Por favor, não responda.
       </p>
     `,
