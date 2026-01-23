@@ -1,4 +1,4 @@
-import { Calendar, UserPlus, FileText, ClipboardList, Plus } from 'lucide-react';
+import { Calendar, UserPlus, FileText, ClipboardList, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Link } from 'react-router-dom';
 
@@ -13,17 +13,17 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
       icon: UserPlus,
       label: 'Adicionar Paciente',
       description: 'Cadastrar novo paciente',
-      iconBg: 'bg-primary',
-      iconColor: 'text-primary-foreground',
+      color: 'text-primary',
+      bgColor: 'bg-primary/10',
       to: '/pacientes',
       requiresPatient: false,
     },
     {
       icon: Calendar,
       label: 'Agendar Sessão',
-      description: hasPatients ? 'Agendar consulta' : 'Requer paciente',
-      iconBg: 'bg-success',
-      iconColor: 'text-success-foreground',
+      description: hasPatients ? 'Agendar nova consulta' : 'Requer paciente',
+      color: 'text-success',
+      bgColor: 'bg-success/10',
       onClick: onNewAppointment,
       requiresPatient: true,
       disabled: !hasPatients,
@@ -32,8 +32,8 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
       icon: FileText,
       label: 'Ver Documentos',
       description: hasPatients ? 'Recibos e atestados' : 'Requer paciente',
-      iconBg: 'bg-accent',
-      iconColor: 'text-accent-foreground',
+      color: 'text-accent',
+      bgColor: 'bg-accent/10',
       to: '/documentos',
       requiresPatient: true,
       disabled: !hasPatients,
@@ -42,8 +42,8 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
       icon: ClipboardList,
       label: 'Anamnese',
       description: hasPatients ? 'Prontuário do paciente' : 'Requer paciente',
-      iconBg: 'bg-warning',
-      iconColor: 'text-warning-foreground',
+      color: 'text-warning',
+      bgColor: 'bg-warning/10',
       to: '/prontuarios',
       requiresPatient: true,
       disabled: !hasPatients,
@@ -51,44 +51,40 @@ export function QuickActions({ onNewAppointment, hasPatients = true }: QuickActi
   ];
 
   return (
-    <div className="bg-card border border-border/50 rounded-2xl p-6">
-      <h3 className="font-display text-lg font-semibold text-foreground mb-5">
+    <div className="glass-card p-5 h-full">
+      <h3 className="text-sm font-semibold text-foreground mb-4 flex items-center gap-2">
+        <span className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
         Ações Rápidas
       </h3>
       
-      <div className="space-y-3">
+      <div className="space-y-2">
         {actions.map((action, index) => {
           const content = (
-            <div className="flex items-center gap-4 w-full">
+            <>
               <div className={cn(
-                'h-11 w-11 rounded-xl flex items-center justify-center shrink-0',
-                action.iconBg,
+                'h-10 w-10 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-200 group-hover:scale-105',
+                action.bgColor,
                 action.disabled && 'opacity-50'
               )}>
-                {action.label === 'Adicionar Paciente' ? (
-                  <Plus className={cn('h-5 w-5', action.iconColor)} />
-                ) : (
-                  <action.icon className={cn('h-5 w-5', action.iconColor)} />
-                )}
+                <action.icon className={cn('h-[18px] w-[18px]', action.color)} />
               </div>
-              <div className="text-left flex-1">
+              <div className="flex-1 text-left">
                 <p className={cn(
                   "text-sm font-medium text-foreground",
                   action.disabled && 'text-muted-foreground'
                 )}>{action.label}</p>
                 <p className="text-xs text-muted-foreground">{action.description}</p>
               </div>
-              {action.disabled && (
-                <div className="h-2 w-2 rounded-full bg-warning shrink-0" />
-              )}
-            </div>
+              <ChevronRight className={cn(
+                "h-4 w-4 text-muted-foreground/50 transition-transform duration-200 group-hover:translate-x-0.5",
+                action.disabled && 'opacity-0'
+              )} />
+            </>
           );
 
           const baseClasses = cn(
-            "flex items-center w-full p-3 rounded-xl border border-border/30 transition-all duration-200 animate-slide-up",
-            action.disabled 
-              ? "bg-muted/30 cursor-not-allowed" 
-              : "bg-secondary/20 hover:bg-secondary/40 hover:border-border/50 hover:-translate-y-0.5"
+            "action-btn group animate-slide-up",
+            action.disabled && "cursor-not-allowed opacity-60"
           );
 
           if (action.disabled) {
