@@ -113,6 +113,20 @@ export function WaitingRoom({ patientName, professionalName, messages = [], onSe
                 </div>
               </ScrollArea>
 
+              {/* Typing indicator */}
+              {typingUsers.length > 0 && (
+                <div className="flex items-center gap-2 px-1">
+                  <div className="flex gap-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
+                  </div>
+                  <span className="text-xs text-muted-foreground italic">
+                    {typingUsers.join(', ')} {typingUsers.length === 1 ? 'está' : 'estão'} digitando...
+                  </span>
+                </div>
+              )}
+
               {/* Message input for patient */}
               {onSendMessage && (
                 <div className="flex items-center gap-2">
