@@ -567,6 +567,8 @@ const VideoRoom = () => {
                   onAdmit={() => admitParticipant(participant)}
                   onDeny={() => denyParticipant(participant)}
                   onSendMessage={(msg) => sendMessage(msg, user?.email || 'Profissional')}
+                  onTyping={() => setTyping(user?.email || 'Profissional')}
+                  typingUsers={typingUsers}
                 />
               ))}
             </div>
