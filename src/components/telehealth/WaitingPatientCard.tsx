@@ -11,6 +11,8 @@ interface WaitingPatientCardProps {
   onAdmit: () => void;
   onDeny: () => void;
   onSendMessage: (message: string) => void;
+  onTyping?: () => void;
+  typingUsers?: string[];
   isAdmitting?: boolean;
 }
 
