@@ -22,6 +22,8 @@ export function WaitingPatientCard({
   onAdmit,
   onDeny,
   onSendMessage,
+  onTyping,
+  typingUsers = [],
   isAdmitting,
 }: WaitingPatientCardProps) {
   const [message, setMessage] = useState('');
