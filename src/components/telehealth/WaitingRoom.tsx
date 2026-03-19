@@ -19,6 +19,8 @@ interface WaitingRoomProps {
   professionalName?: string;
   messages?: WaitingRoomMessage[];
   onSendMessage?: (message: string) => void;
+  onTyping?: () => void;
+  typingUsers?: string[];
 }
 
 export function WaitingRoom({ patientName, professionalName, messages = [], onSendMessage }: WaitingRoomProps) {
