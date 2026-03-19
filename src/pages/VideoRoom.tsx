@@ -368,6 +368,8 @@ const VideoRoom = () => {
         patientName={patientName} 
         messages={waitingRoomMessages} 
         onSendMessage={(msg) => sendMessage(msg, patientName)}
+        onTyping={() => setTyping(patientName)}
+        typingUsers={typingUsers}
       />
     );
   }
