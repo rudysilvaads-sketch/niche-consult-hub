@@ -11,6 +11,8 @@ interface WaitingPatientCardProps {
   onAdmit: () => void;
   onDeny: () => void;
   onSendMessage: (message: string) => void;
+  onTyping?: () => void;
+  typingUsers?: string[];
   isAdmitting?: boolean;
 }
 
@@ -20,6 +22,8 @@ export function WaitingPatientCard({
   onAdmit,
   onDeny,
   onSendMessage,
+  onTyping,
+  typingUsers = [],
   isAdmitting,
 }: WaitingPatientCardProps) {
   const [message, setMessage] = useState('');
@@ -97,28 +101,43 @@ export function WaitingPatientCard({
         
         {/* Message input */}
         {showMessageInput && (
-          <div className="flex items-center gap-2 pt-2 border-t">
-            <Input
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Digite uma mensagem para o paciente..."
-              className="flex-1 text-sm"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage();
-                }
-              }}
-              autoFocus
-            />
-            <Button
-              size="sm"
-              onClick={handleSendMessage}
-              disabled={!message.trim()}
-              className="btn-gradient"
-            >
-              <Send className="w-4 h-4" />
-            </Button>
+          <div className="flex flex-col gap-2 pt-2 border-t">
+            <div className="flex items-center gap-2">
+              <Input
+                value={message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  if (e.target.value.trim() && onTyping) onTyping();
+                }}
+                placeholder="Digite uma mensagem para o paciente..."
+                className="flex-1 text-sm"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                  }
+                }}
+                autoFocus
+              />
+              <Button
+                size="sm"
+                onClick={handleSendMessage}
+                disabled={!message.trim()}
+                className="btn-gradient"
+              >
+                <Send className="w-4 h-4" />
+              </Button>
+            </div>
+            {typingUsers.length > 0 && (
+              <div className="flex items-center gap-1">
+                <div className="flex gap-0.5">
+                  <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
+                </div>
+                <span className="text-xs text-muted-foreground italic">digitando...</span>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

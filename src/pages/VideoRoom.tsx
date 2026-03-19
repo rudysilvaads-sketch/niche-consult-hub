@@ -65,11 +65,13 @@ const VideoRoom = () => {
     messages: waitingRoomMessages,
     isAdmitted,
     isDenied,
+    typingUsers,
     joinWaitingRoom,
     leaveWaitingRoom,
     admitParticipant,
     denyParticipant,
     sendMessage,
+    setTyping,
   } = useWaitingRoom({
     sessionId: sessionId || '',
     isHost,
@@ -366,6 +368,8 @@ const VideoRoom = () => {
         patientName={patientName} 
         messages={waitingRoomMessages} 
         onSendMessage={(msg) => sendMessage(msg, patientName)}
+        onTyping={() => setTyping(patientName)}
+        typingUsers={typingUsers}
       />
     );
   }
@@ -563,6 +567,8 @@ const VideoRoom = () => {
                   onAdmit={() => admitParticipant(participant)}
                   onDeny={() => denyParticipant(participant)}
                   onSendMessage={(msg) => sendMessage(msg, user?.email || 'Profissional')}
+                  onTyping={() => setTyping(user?.email || 'Profissional')}
+                  typingUsers={typingUsers}
                 />
               ))}
             </div>
