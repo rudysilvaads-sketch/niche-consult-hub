@@ -132,7 +132,10 @@ export function WaitingRoom({ patientName, professionalName, messages = [], onSe
                 <div className="flex items-center gap-2">
                   <Input
                     value={message}
-                    onChange={(e) => setMessage(e.target.value)}
+                    onChange={(e) => {
+                      setMessage(e.target.value);
+                      if (e.target.value.trim() && onTyping) onTyping();
+                    }}
                     placeholder="Digite uma mensagem..."
                     className="flex-1 text-sm"
                     onKeyDown={(e) => {

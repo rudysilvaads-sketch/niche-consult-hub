@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { doc, onSnapshot, updateDoc, arrayUnion, arrayRemove, setDoc, getDoc } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
 
@@ -16,11 +16,17 @@ interface WaitingRoomMessage {
   timestamp: string;
 }
 
+interface TypingStatus {
+  [key: string]: { name: string; timestamp: number };
+}
+
 interface UseWaitingRoomProps {
   sessionId: string;
   isHost: boolean;
   participantName?: string;
 }
+
+const TYPING_TIMEOUT = 3000; // 3 seconds
 
 export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitingRoomProps) {
   const [waitingParticipants, setWaitingParticipants] = useState<WaitingParticipant[]>([]);
@@ -28,11 +34,11 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
   const [isAdmitted, setIsAdmitted] = useState(false);
   const [isDenied, setIsDenied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [typingUsers, setTypingUsers] = useState<string[]>([]);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Store participant name in a ref to track changes
   const [currentParticipantName, setCurrentParticipantName] = useState(participantName || '');
 
-  // Update current participant name when prop changes
   useEffect(() => {
     if (participantName) {
       setCurrentParticipantName(participantName);
@@ -56,25 +62,24 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
         const admitted: string[] = data.admittedParticipants || [];
         const denied: string[] = data.deniedParticipants || [];
         const roomMessages: WaitingRoomMessage[] = data.waitingRoomMessages || [];
+        const typing: TypingStatus = data.typingStatus || {};
 
         setWaitingParticipants(waiting);
         setMessages(roomMessages);
 
+        // Process typing status - filter out expired and self
+        const now = Date.now();
+        const myKey = isHost ? 'host' : `patient-${currentParticipantName}`;
+        const activeTypers = Object.entries(typing)
+          .filter(([key, val]) => key !== myKey && (now - val.timestamp) < TYPING_TIMEOUT)
+          .map(([, val]) => val.name);
+        setTypingUsers(activeTypers);
+
         // Check if current participant was admitted or denied
         if (!isHost && currentParticipantName) {
           const participantId = `${currentParticipantName}-${sessionId}`;
-          const wasAdmitted = admitted.includes(participantId);
-          const wasDenied = denied.includes(participantId);
-          
-          console.log('🔍 Checking admission status:', { 
-            participantId, 
-            admitted, 
-            wasAdmitted, 
-            currentParticipantName 
-          });
-          
-          setIsAdmitted(wasAdmitted);
-          setIsDenied(wasDenied);
+          setIsAdmitted(admitted.includes(participantId));
+          setIsDenied(denied.includes(participantId));
         }
       }
       
@@ -84,7 +89,31 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
     return () => unsubscribe();
   }, [sessionId, isHost, currentParticipantName]);
 
-  // Join waiting room (for patients)
+  // Set typing status
+  const setTyping = useCallback(async (name: string) => {
+    if (!isFirebaseConfigured || !db || !sessionId) return;
+
+    const callDoc = doc(db, 'calls', sessionId);
+    const key = isHost ? 'host' : `patient-${name}`;
+
+    try {
+      await updateDoc(callDoc, {
+        [`typingStatus.${key}`]: { name, timestamp: Date.now() },
+      });
+
+      // Clear typing after timeout
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      typingTimeoutRef.current = setTimeout(async () => {
+        try {
+          await updateDoc(callDoc, {
+            [`typingStatus.${key}`]: { name, timestamp: 0 },
+          });
+        } catch (e) { /* ignore */ }
+      }, TYPING_TIMEOUT);
+    } catch (e) { /* ignore */ }
+  }, [sessionId, isHost]);
+
+  // Join waiting room
   const joinWaitingRoom = useCallback(async (name: string) => {
     if (!isFirebaseConfigured || !db || !sessionId) return;
 
@@ -96,31 +125,26 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
     };
 
     try {
-      // Check if document exists, if not create it
       const docSnap = await getDoc(callDoc);
-      
       if (!docSnap.exists()) {
-        // Create the document with initial waiting participant
         await setDoc(callDoc, {
           waitingParticipants: [participant],
           admittedParticipants: [],
           deniedParticipants: [],
+          typingStatus: {},
           createdAt: new Date().toISOString(),
         });
-        console.log('✅ Created call document and joined waiting room');
       } else {
-        // Document exists, just add to waiting list
         await updateDoc(callDoc, {
           waitingParticipants: arrayUnion(participant),
         });
-        console.log('✅ Joined waiting room');
       }
     } catch (error) {
       console.error('❌ Error joining waiting room:', error);
     }
   }, [sessionId]);
 
-  // Leave waiting room (for patients)
+  // Leave waiting room
   const leaveWaitingRoom = useCallback(async (name: string) => {
     if (!isFirebaseConfigured || !db || !sessionId) return;
 
@@ -132,48 +156,43 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
         await updateDoc(callDoc, {
           waitingParticipants: arrayRemove(participantToRemove),
         });
-        console.log('✅ Left waiting room');
       } catch (error) {
         console.error('❌ Error leaving waiting room:', error);
       }
     }
   }, [sessionId, waitingParticipants]);
 
-  // Admit participant (for host)
+  // Admit participant
   const admitParticipant = useCallback(async (participant: WaitingParticipant) => {
     if (!isFirebaseConfigured || !db || !sessionId || !isHost) return;
 
     const callDoc = doc(db, 'calls', sessionId);
-
     try {
       await updateDoc(callDoc, {
         waitingParticipants: arrayRemove(participant),
         admittedParticipants: arrayUnion(participant.odid),
       });
-      console.log('✅ Participant admitted:', participant.name);
     } catch (error) {
       console.error('❌ Error admitting participant:', error);
     }
   }, [sessionId, isHost]);
 
-  // Deny participant (for host)
+  // Deny participant
   const denyParticipant = useCallback(async (participant: WaitingParticipant) => {
     if (!isFirebaseConfigured || !db || !sessionId || !isHost) return;
 
     const callDoc = doc(db, 'calls', sessionId);
-
     try {
       await updateDoc(callDoc, {
         waitingParticipants: arrayRemove(participant),
         deniedParticipants: arrayUnion(participant.odid),
       });
-      console.log('✅ Participant denied:', participant.name);
     } catch (error) {
       console.error('❌ Error denying participant:', error);
     }
   }, [sessionId, isHost]);
 
-  // Send message to waiting room
+  // Send message
   const sendMessage = useCallback(async (text: string, senderName: string) => {
     if (!isFirebaseConfigured || !db || !sessionId || !text.trim()) return;
 
@@ -186,11 +205,13 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
       timestamp: new Date().toISOString(),
     };
 
+    // Clear typing status when sending
+    const key = isHost ? 'host' : `patient-${senderName}`;
     try {
       await updateDoc(callDoc, {
         waitingRoomMessages: arrayUnion(message),
+        [`typingStatus.${key}`]: { name: senderName, timestamp: 0 },
       });
-      console.log('✅ Message sent:', text);
     } catch (error) {
       console.error('❌ Error sending message:', error);
     }
@@ -202,10 +223,12 @@ export function useWaitingRoom({ sessionId, isHost, participantName }: UseWaitin
     isAdmitted,
     isDenied,
     loading,
+    typingUsers,
     joinWaitingRoom,
     leaveWaitingRoom,
     admitParticipant,
     denyParticipant,
     sendMessage,
+    setTyping,
   };
 }
