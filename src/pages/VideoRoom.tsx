@@ -65,11 +65,13 @@ const VideoRoom = () => {
     messages: waitingRoomMessages,
     isAdmitted,
     isDenied,
+    typingUsers,
     joinWaitingRoom,
     leaveWaitingRoom,
     admitParticipant,
     denyParticipant,
     sendMessage,
+    setTyping,
   } = useWaitingRoom({
     sessionId: sessionId || '',
     isHost,
