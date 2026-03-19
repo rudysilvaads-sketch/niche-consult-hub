@@ -104,7 +104,10 @@ export function WaitingPatientCard({
           <div className="flex items-center gap-2 pt-2 border-t">
             <Input
               value={message}
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                if (e.target.value.trim() && onTyping) onTyping();
+              }}
               placeholder="Digite uma mensagem para o paciente..."
               className="flex-1 text-sm"
               onKeyDown={(e) => {
@@ -115,6 +118,16 @@ export function WaitingPatientCard({
               }}
               autoFocus
             />
+            {typingUsers.length > 0 && (
+              <div className="flex items-center gap-1 mt-1">
+                <div className="flex gap-0.5">
+                  <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:0ms]" />
+                  <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:150ms]" />
+                  <span className="w-1 h-1 rounded-full bg-primary animate-bounce [animation-delay:300ms]" />
+                </div>
+                <span className="text-xs text-muted-foreground italic">digitando...</span>
+              </div>
+            )
             <Button
               size="sm"
               onClick={handleSendMessage}
