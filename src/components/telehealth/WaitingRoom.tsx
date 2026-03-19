@@ -23,7 +23,7 @@ interface WaitingRoomProps {
   typingUsers?: string[];
 }
 
-export function WaitingRoom({ patientName, professionalName, messages = [], onSendMessage }: WaitingRoomProps) {
+export function WaitingRoom({ patientName, professionalName, messages = [], onSendMessage, onTyping, typingUsers = [] }: WaitingRoomProps) {
   const [message, setMessage] = useState('');
 
   const handleSendMessage = () => {
