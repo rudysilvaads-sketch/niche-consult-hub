@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { 
   BarChart3, 
   TrendingUp, 
@@ -24,51 +24,12 @@ import {
   Cell,
   BarChart,
   Bar,
-  Legend
 } from 'recharts';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Relatorios = () => {
   const [period, setPeriod] = useState('mes');
   const { patients, appointments, transactions, stats } = useApp();
-
-  // Generate chart data
-  const revenueData = [
-    { name: 'Jan', receita: 4500, despesa: 2800 },
-    { name: 'Fev', receita: 5200, despesa: 2900 },
-    { name: 'Mar', receita: 4800, despesa: 2700 },
-    { name: 'Abr', receita: 6100, despesa: 3100 },
-    { name: 'Mai', receita: 5800, despesa: 2850 },
-    { name: 'Jun', receita: stats.monthRevenue || 5500, despesa: stats.monthExpenses || 2600 },
-  ];
-
-  const appointmentsByType = appointments.reduce((acc, apt) => {
-    acc[apt.type] = (acc[apt.type] || 0) + 1;
-    return acc;
-  }, {} as Record<string, number>);
-
-  const appointmentTypeData = Object.entries(appointmentsByType).map(([name, value]) => ({
-    name: name.length > 15 ? name.substring(0, 15) + '...' : name,
-    value,
-  }));
-
-  const statusData = [
-    { name: 'Agendado', value: appointments.filter(a => a.status === 'agendado').length },
-    { name: 'Confirmado', value: appointments.filter(a => a.status === 'confirmado').length },
-    { name: 'Concluído', value: appointments.filter(a => a.status === 'concluido').length },
-    { name: 'Cancelado', value: appointments.filter(a => a.status === 'cancelado').length },
-  ].filter(d => d.value > 0);
-
-  const COLORS = ['hsl(173, 58%, 39%)', 'hsl(38, 92%, 50%)', 'hsl(152, 69%, 40%)', 'hsl(0, 72%, 51%)'];
-
-  const weekDayData = [
-    { name: 'Seg', consultas: 12 },
-    { name: 'Ter', consultas: 15 },
-    { name: 'Qua', consultas: 18 },
-    { name: 'Qui', consultas: 14 },
-    { name: 'Sex', consultas: 10 },
-    { name: 'Sab', consultas: 5 },
-  ];
 
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -77,6 +38,117 @@ const Relatorios = () => {
       minimumFractionDigits: 0,
     }).format(value);
   };
+
+  // Filter data by selected period
+  const getDateRange = useMemo(() => {
+    const now = new Date();
+    const start = new Date();
+
+    switch (period) {
+      case 'semana':
+        start.setDate(now.getDate() - 7);
+        break;
+      case 'mes':
+        start.setMonth(now.getMonth() - 1);
+        break;
+      case 'trimestre':
+        start.setMonth(now.getMonth() - 3);
+        break;
+      case 'ano':
+        start.setFullYear(now.getFullYear() - 1);
+        break;
+    }
+
+    return { start, end: now };
+  }, [period]);
+
+  // Generate real revenue data from transactions grouped by month
+  const revenueData = useMemo(() => {
+    const months: Record<string, { receita: number; despesa: number }> = {};
+    const monthNames = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+    // Initialize last 6 months
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const key = `${d.getFullYear()}-${d.getMonth()}`;
+      months[key] = { receita: 0, despesa: 0 };
+    }
+
+    transactions.forEach((t) => {
+      const date = new Date(t.date);
+      const key = `${date.getFullYear()}-${date.getMonth()}`;
+      if (months[key] && t.status === 'pago') {
+        if (t.type === 'receita') {
+          months[key].receita += t.value;
+        } else {
+          months[key].despesa += t.value;
+        }
+      }
+    });
+
+    return Object.entries(months).map(([key, values]) => {
+      const [year, month] = key.split('-').map(Number);
+      return {
+        name: monthNames[month],
+        receita: values.receita,
+        despesa: values.despesa,
+      };
+    });
+  }, [transactions]);
+
+  // Real appointment data by type
+  const filteredAppointments = useMemo(() => {
+    return appointments.filter((a) => {
+      const date = new Date(a.date);
+      return date >= getDateRange.start && date <= getDateRange.end;
+    });
+  }, [appointments, getDateRange]);
+
+  const appointmentTypeData = useMemo(() => {
+    const byType = filteredAppointments.reduce((acc, apt) => {
+      const type = apt.type || 'Não definido';
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    return Object.entries(byType).map(([name, value]) => ({
+      name: name.length > 15 ? name.substring(0, 15) + '...' : name,
+      value,
+    }));
+  }, [filteredAppointments]);
+
+  const statusData = useMemo(() => {
+    return [
+      { name: 'Agendado', value: filteredAppointments.filter(a => a.status === 'agendado').length },
+      { name: 'Confirmado', value: filteredAppointments.filter(a => a.status === 'confirmado').length },
+      { name: 'Concluído', value: filteredAppointments.filter(a => a.status === 'concluido').length },
+      { name: 'Cancelado', value: filteredAppointments.filter(a => a.status === 'cancelado').length },
+    ].filter(d => d.value > 0);
+  }, [filteredAppointments]);
+
+  const COLORS = ['hsl(173, 58%, 39%)', 'hsl(38, 92%, 50%)', 'hsl(152, 69%, 40%)', 'hsl(0, 72%, 51%)'];
+
+  // Real appointments by day of week
+  const weekDayData = useMemo(() => {
+    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sab'];
+    const counts = new Array(7).fill(0);
+
+    filteredAppointments.forEach((a) => {
+      const dayOfWeek = new Date(a.date).getDay();
+      counts[dayOfWeek]++;
+    });
+
+    // Return Mon-Sat (skip Sunday index 0, or include all)
+    return days.map((name, i) => ({ name, consultas: counts[i] })).filter((_, i) => i >= 1); // Mon-Sat
+  }, [filteredAppointments]);
+
+  // Completion rate for filtered period
+  const completionRate = useMemo(() => {
+    if (filteredAppointments.length === 0) return 0;
+    const completed = filteredAppointments.filter(a => a.status === 'concluido').length;
+    return Math.round((completed / filteredAppointments.length) * 100);
+  }, [filteredAppointments]);
 
   return (
     <MainLayout>
@@ -121,7 +193,7 @@ const Relatorios = () => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground truncate">Consultas</p>
-              <p className="text-lg sm:text-xl font-bold text-foreground">{appointments.length}</p>
+              <p className="text-lg sm:text-xl font-bold text-foreground">{filteredAppointments.length}</p>
             </div>
           </div>
         </div>
@@ -145,11 +217,7 @@ const Relatorios = () => {
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs sm:text-sm text-muted-foreground truncate">Taxa Conclusão</p>
-              <p className="text-lg sm:text-xl font-bold text-foreground">
-                {appointments.length > 0 
-                  ? Math.round((stats.completedThisMonth / appointments.length) * 100)
-                  : 0}%
-              </p>
+              <p className="text-lg sm:text-xl font-bold text-foreground">{completionRate}%</p>
             </div>
           </div>
         </div>
@@ -207,52 +275,56 @@ const Relatorios = () => {
           <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
               <h3 className="font-semibold text-foreground text-sm sm:text-base">Status das Consultas</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground">Distribuição atual</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Distribuição no período</p>
             </div>
             <PieChart className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
           <div className="h-48 sm:h-64 flex items-center justify-center">
-            <ResponsiveContainer width="100%" height="100%">
-              <RechartsPie>
-                <Pie
-                  data={statusData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={40}
-                  outerRadius={70}
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                  fontSize={10}
-                >
-                  {statusData.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px'
-                  }}
-                />
-              </RechartsPie>
-            </ResponsiveContainer>
+            {statusData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPie>
+                  <Pie
+                    data={statusData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={40}
+                    outerRadius={70}
+                    paddingAngle={5}
+                    dataKey="value"
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                    labelLine={false}
+                    fontSize={10}
+                  >
+                    {statusData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
+                  />
+                </RechartsPie>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-muted-foreground text-sm">Nenhum dado no período selecionado</p>
+            )}
           </div>
         </div>
 
         {/* Appointments by Day */}
-        <div className="card-elevated p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="card-elevated p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h3 className="font-semibold text-foreground">Consultas por Dia da Semana</h3>
-              <p className="text-sm text-muted-foreground">Média de atendimentos</p>
+              <h3 className="font-semibold text-foreground text-sm sm:text-base">Consultas por Dia da Semana</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Distribuição no período</p>
             </div>
-            <BarChart3 className="h-5 w-5 text-accent" />
+            <BarChart3 className="h-4 w-4 sm:h-5 sm:w-5 text-accent" />
           </div>
-          <div className="h-64">
+          <div className="h-48 sm:h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={weekDayData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -272,13 +344,13 @@ const Relatorios = () => {
         </div>
 
         {/* Types of Appointments */}
-        <div className="card-elevated p-6">
-          <div className="flex items-center justify-between mb-6">
+        <div className="card-elevated p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 sm:mb-6">
             <div>
-              <h3 className="font-semibold text-foreground">Tipos de Consulta</h3>
-              <p className="text-sm text-muted-foreground">Distribuição por tipo</p>
+              <h3 className="font-semibold text-foreground text-sm sm:text-base">Tipos de Consulta</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">Distribuição por tipo</p>
             </div>
-            <Activity className="h-5 w-5 text-warning" />
+            <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-warning" />
           </div>
           <div className="space-y-4">
             {appointmentTypeData.length === 0 ? (
@@ -308,13 +380,13 @@ const Relatorios = () => {
       </div>
 
       {/* Top Patients */}
-      <div className="card-elevated p-6">
-        <div className="flex items-center justify-between mb-6">
+      <div className="card-elevated p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h3 className="font-semibold text-foreground">Pacientes Mais Ativos</h3>
-            <p className="text-sm text-muted-foreground">Maior número de consultas</p>
+            <h3 className="font-semibold text-foreground text-sm sm:text-base">Pacientes Mais Ativos</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">Maior número de consultas</p>
           </div>
-          <Users className="h-5 w-5 text-primary" />
+          <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -327,10 +399,15 @@ const Relatorios = () => {
               </tr>
             </thead>
             <tbody>
-              {patients.slice(0, 5).map((patient) => {
-                const patientAppointments = appointments.filter(a => a.patientId === patient.id);
-                const totalValue = patientAppointments.reduce((sum, a) => sum + (a.value || 0), 0);
-                return (
+              {patients
+                .map((patient) => {
+                  const patientAppointments = appointments.filter(a => a.patientId === patient.id);
+                  const totalValue = patientAppointments.reduce((sum, a) => sum + (a.value || 0), 0);
+                  return { patient, count: patientAppointments.length, totalValue };
+                })
+                .sort((a, b) => b.count - a.count)
+                .slice(0, 5)
+                .map(({ patient, count, totalValue }) => (
                   <tr key={patient.id} className="border-b border-border/50 hover:bg-muted/30 transition-colors">
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-3">
@@ -345,13 +422,12 @@ const Relatorios = () => {
                     <td className="py-3 px-4 text-muted-foreground">{patient.email}</td>
                     <td className="py-3 px-4 text-center">
                       <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-sm font-medium">
-                        {patientAppointments.length}
+                        {count}
                       </span>
                     </td>
                     <td className="py-3 px-4 text-right font-medium text-success">{formatCurrency(totalValue)}</td>
                   </tr>
-                );
-              })}
+                ))}
             </tbody>
           </table>
         </div>

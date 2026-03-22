@@ -7,10 +7,12 @@ import {
   deleteDoc,
   query,
   orderBy,
+  where,
   onSnapshot,
   Timestamp,
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from '@/lib/firebase';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Patient,
   Appointment,
@@ -36,6 +38,7 @@ const convertTimestamp = (data: any) => {
 };
 
 export function useAppData() {
+  const { user } = useAuth();
   const [patients, setPatients] = useState<Patient[]>([]);
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [records, setRecords] = useState<ConsultationRecord[]>([]);
@@ -47,12 +50,12 @@ export function useAppData() {
   const [loading, setLoading] = useState(true);
   const [firebaseConnected, setFirebaseConnected] = useState(false);
 
-  // Use imported isFirebaseConfigured from firebase.ts
+  const userId = user?.uid;
 
-  // Subscribe to Firestore collections
+  // Subscribe to Firestore collections filtered by userId
   useEffect(() => {
-    if (!isFirebaseConfigured) {
-      // Fallback to mock data if Firebase not configured
+    if (!isFirebaseConfigured || !userId) {
+      // Fallback to mock data if Firebase not configured or user not logged in
       setPatients(mockPatients);
       setAppointments(mockAppointments);
       setRecords(mockRecords);
@@ -75,12 +78,16 @@ export function useAppData() {
           setter(fallbackData);
           return;
         }
-        const q = query(collection(db, collectionName), orderBy('createdAt', 'desc'));
+        // Filter by userId (multi-tenancy)
+        const q = query(
+          collection(db, collectionName),
+          where('userId', '==', userId),
+          orderBy('createdAt', 'desc')
+        );
         const unsubscribe = onSnapshot(
           q,
           (snapshot) => {
             if (snapshot.empty && !firebaseConnected) {
-              // Use mock data if collection is empty on first load
               setter(fallbackData);
             } else {
               const items = snapshot.docs.map((doc) => ({
@@ -117,7 +124,15 @@ export function useAppData() {
     return () => {
       unsubscribers.forEach((unsub) => unsub());
     };
-  }, [isFirebaseConfigured, firebaseConnected]);
+  }, [userId, firebaseConnected]);
+
+  // Helper: inject userId into new documents
+  const withUserId = useCallback((data: any) => {
+    if (userId) {
+      return { ...data, userId };
+    }
+    return data;
+  }, [userId]);
 
   // Patient CRUD
   const addPatient = useCallback(async (patient: Partial<Patient>) => {
@@ -135,7 +150,7 @@ export function useAppData() {
 
     if (isFirebaseConfigured && db) {
       try {
-        const docRef = await addDoc(collection(db, 'patients'), newPatient);
+        const docRef = await addDoc(collection(db, 'patients'), withUserId(newPatient));
         return { id: docRef.id, ...newPatient };
       } catch (error) {
         console.error('Error adding patient:', error);
@@ -146,7 +161,7 @@ export function useAppData() {
       setPatients((prev) => [...prev, localPatient]);
       return localPatient;
     }
-  }, [isFirebaseConfigured]);
+  }, [withUserId]);
 
   const updatePatient = useCallback(async (id: string, updates: Partial<Patient>) => {
     if (isFirebaseConfigured && db) {
@@ -159,7 +174,7 @@ export function useAppData() {
     } else {
       setPatients((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   const deletePatient = useCallback(async (id: string) => {
     if (isFirebaseConfigured && db) {
@@ -172,14 +187,14 @@ export function useAppData() {
     } else {
       setPatients((prev) => prev.filter((p) => p.id !== id));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   // Appointment CRUD
   const addAppointment = useCallback(async (appointment: Partial<Appointment>) => {
     const newAppointment: Omit<Appointment, 'id'> = {
       patientId: appointment.patientId || '',
       patientName: appointment.patientName || '',
-      professionalId: '1',
+      professionalId: userId || '1',
       date: appointment.date || '',
       time: appointment.time || '',
       duration: appointment.duration || 60,
@@ -190,14 +205,13 @@ export function useAppData() {
       paymentStatus: appointment.paymentStatus,
       paymentMethod: appointment.paymentMethod,
       createdAt: new Date().toISOString().split('T')[0],
-      // Initialize reminder tracking fields
       reminderSent1h: false,
       reminderSent24h: false,
     };
 
     if (isFirebaseConfigured && db) {
       try {
-        const docRef = await addDoc(collection(db, 'appointments'), newAppointment);
+        const docRef = await addDoc(collection(db, 'appointments'), withUserId(newAppointment));
         return { id: docRef.id, ...newAppointment };
       } catch (error) {
         console.error('Error adding appointment:', error);
@@ -208,7 +222,7 @@ export function useAppData() {
       setAppointments((prev) => [...prev, localAppointment]);
       return localAppointment;
     }
-  }, [isFirebaseConfigured]);
+  }, [userId, withUserId]);
 
   const updateAppointment = useCallback(async (id: string, updates: Partial<Appointment>) => {
     if (isFirebaseConfigured && db) {
@@ -221,7 +235,7 @@ export function useAppData() {
     } else {
       setAppointments((prev) => prev.map((a) => (a.id === id ? { ...a, ...updates } : a)));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   const deleteAppointment = useCallback(async (id: string) => {
     if (isFirebaseConfigured && db) {
@@ -234,7 +248,7 @@ export function useAppData() {
     } else {
       setAppointments((prev) => prev.filter((a) => a.id !== id));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   // Record CRUD
   const addRecord = useCallback(async (record: Partial<ConsultationRecord>) => {
@@ -252,7 +266,7 @@ export function useAppData() {
 
     if (isFirebaseConfigured && db) {
       try {
-        const docRef = await addDoc(collection(db, 'records'), newRecord);
+        const docRef = await addDoc(collection(db, 'records'), withUserId(newRecord));
         return { id: docRef.id, ...newRecord };
       } catch (error) {
         console.error('Error adding record:', error);
@@ -263,7 +277,7 @@ export function useAppData() {
       setRecords((prev) => [...prev, localRecord]);
       return localRecord;
     }
-  }, [isFirebaseConfigured]);
+  }, [withUserId]);
 
   const updateRecord = useCallback(async (id: string, updates: Partial<ConsultationRecord>) => {
     if (isFirebaseConfigured && db) {
@@ -276,7 +290,7 @@ export function useAppData() {
     } else {
       setRecords((prev) => prev.map((r) => (r.id === id ? { ...r, ...updates } : r)));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   const deleteRecord = useCallback(async (id: string) => {
     if (isFirebaseConfigured && db) {
@@ -289,7 +303,7 @@ export function useAppData() {
     } else {
       setRecords((prev) => prev.filter((r) => r.id !== id));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   // Transaction CRUD
   const addTransaction = useCallback(async (transaction: Partial<Transaction>) => {
@@ -309,7 +323,7 @@ export function useAppData() {
 
     if (isFirebaseConfigured && db) {
       try {
-        const docRef = await addDoc(collection(db, 'transactions'), newTransaction);
+        const docRef = await addDoc(collection(db, 'transactions'), withUserId(newTransaction));
         return { id: docRef.id, ...newTransaction };
       } catch (error) {
         console.error('Error adding transaction:', error);
@@ -320,7 +334,7 @@ export function useAppData() {
       setTransactions((prev) => [...prev, localTransaction]);
       return localTransaction;
     }
-  }, [isFirebaseConfigured]);
+  }, [withUserId]);
 
   const updateTransaction = useCallback(async (id: string, updates: Partial<Transaction>) => {
     if (isFirebaseConfigured && db) {
@@ -333,7 +347,7 @@ export function useAppData() {
     } else {
       setTransactions((prev) => prev.map((t) => (t.id === id ? { ...t, ...updates } : t)));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   const deleteTransaction = useCallback(async (id: string) => {
     if (isFirebaseConfigured && db) {
@@ -346,7 +360,7 @@ export function useAppData() {
     } else {
       setTransactions((prev) => prev.filter((t) => t.id !== id));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   // Package CRUD
   const addPackage = useCallback(async (pkg: Partial<ServicePackage>) => {
@@ -362,7 +376,7 @@ export function useAppData() {
 
     if (isFirebaseConfigured && db) {
       try {
-        const docRef = await addDoc(collection(db, 'packages'), newPackage);
+        const docRef = await addDoc(collection(db, 'packages'), withUserId(newPackage));
         return { id: docRef.id, ...newPackage };
       } catch (error) {
         console.error('Error adding package:', error);
@@ -373,7 +387,7 @@ export function useAppData() {
       setPackages((prev) => [...prev, localPackage]);
       return localPackage;
     }
-  }, [isFirebaseConfigured]);
+  }, [withUserId]);
 
   const updatePackage = useCallback(async (id: string, updates: Partial<ServicePackage>) => {
     if (isFirebaseConfigured && db) {
@@ -386,7 +400,7 @@ export function useAppData() {
     } else {
       setPackages((prev) => prev.map((p) => (p.id === id ? { ...p, ...updates } : p)));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   const deletePackage = useCallback(async (id: string) => {
     if (isFirebaseConfigured && db) {
@@ -399,7 +413,7 @@ export function useAppData() {
     } else {
       setPackages((prev) => prev.filter((p) => p.id !== id));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   // Document CRUD
   const addDocument = useCallback(async (docData: Partial<Document>) => {
@@ -416,7 +430,7 @@ export function useAppData() {
 
     if (isFirebaseConfigured && db) {
       try {
-        const docRef = await addDoc(collection(db, 'documents'), newDocument);
+        const docRef = await addDoc(collection(db, 'documents'), withUserId(newDocument));
         return { id: docRef.id, ...newDocument };
       } catch (error) {
         console.error('Error adding document:', error);
@@ -427,7 +441,7 @@ export function useAppData() {
       setDocuments((prev) => [...prev, localDocument]);
       return localDocument;
     }
-  }, [isFirebaseConfigured]);
+  }, [withUserId]);
 
   const updateDocument = useCallback(async (id: string, updates: Partial<Document>) => {
     if (isFirebaseConfigured && db) {
@@ -440,7 +454,7 @@ export function useAppData() {
     } else {
       setDocuments((prev) => prev.map((d) => (d.id === id ? { ...d, ...updates } : d)));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   const deleteDocument = useCallback(async (id: string) => {
     if (isFirebaseConfigured && db) {
@@ -453,7 +467,7 @@ export function useAppData() {
     } else {
       setDocuments((prev) => prev.filter((d) => d.id !== id));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   // Patient Group CRUD
   const addPatientGroup = useCallback(async (group: Partial<PatientGroup>) => {
@@ -467,7 +481,7 @@ export function useAppData() {
 
     if (isFirebaseConfigured && db) {
       try {
-        const docRef = await addDoc(collection(db, 'patientGroups'), newGroup);
+        const docRef = await addDoc(collection(db, 'patientGroups'), withUserId(newGroup));
         return { id: docRef.id, ...newGroup };
       } catch (error) {
         console.error('Error adding patient group:', error);
@@ -478,7 +492,7 @@ export function useAppData() {
       setPatientGroups((prev) => [...prev, localGroup]);
       return localGroup;
     }
-  }, [isFirebaseConfigured]);
+  }, [withUserId]);
 
   const updatePatientGroup = useCallback(async (id: string, updates: Partial<PatientGroup>) => {
     if (isFirebaseConfigured && db) {
@@ -491,7 +505,7 @@ export function useAppData() {
     } else {
       setPatientGroups((prev) => prev.map((g) => (g.id === id ? { ...g, ...updates } : g)));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   const deletePatientGroup = useCallback(async (id: string) => {
     if (isFirebaseConfigured && db) {
@@ -504,7 +518,7 @@ export function useAppData() {
     } else {
       setPatientGroups((prev) => prev.filter((g) => g.id !== id));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   // Patient Relationship CRUD
   const addPatientRelationship = useCallback(async (relationship: Partial<PatientRelationship>) => {
@@ -518,7 +532,7 @@ export function useAppData() {
 
     if (isFirebaseConfigured && db) {
       try {
-        const docRef = await addDoc(collection(db, 'patientRelationships'), newRelationship);
+        const docRef = await addDoc(collection(db, 'patientRelationships'), withUserId(newRelationship));
         return { id: docRef.id, ...newRelationship };
       } catch (error) {
         console.error('Error adding patient relationship:', error);
@@ -529,7 +543,7 @@ export function useAppData() {
       setPatientRelationships((prev) => [...prev, localRelationship]);
       return localRelationship;
     }
-  }, [isFirebaseConfigured]);
+  }, [withUserId]);
 
   const deletePatientRelationship = useCallback(async (id: string) => {
     if (isFirebaseConfigured && db) {
@@ -542,7 +556,7 @@ export function useAppData() {
     } else {
       setPatientRelationships((prev) => prev.filter((r) => r.id !== id));
     }
-  }, [isFirebaseConfigured]);
+  }, []);
 
   // Helper to get related patients for a given patient
   const getRelatedPatients = useCallback((patientId: string) => {
@@ -599,8 +613,14 @@ export function useAppData() {
         const weekFromNow = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
         return appointmentDate >= today && appointmentDate <= weekFromNow;
       }).length,
-      completedThisMonth: appointments.filter((a) => a.status === 'concluido').length,
-      canceledThisMonth: appointments.filter((a) => a.status === 'cancelado').length,
+      completedThisMonth: appointments.filter((a) => {
+        const date = new Date(a.date);
+        return a.status === 'concluido' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+      }).length,
+      canceledThisMonth: appointments.filter((a) => {
+        const date = new Date(a.date);
+        return a.status === 'cancelado' && date.getMonth() === currentMonth && date.getFullYear() === currentYear;
+      }).length,
       monthRevenue,
       monthExpenses,
       pendingPayments,
