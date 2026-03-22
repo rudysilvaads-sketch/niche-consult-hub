@@ -1,35 +1,15 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
-import {
-  doc,
-  collection,
-  addDoc,
-  onSnapshot,
-  updateDoc,
-  deleteDoc,
-  getDoc,
-  setDoc,
-  query,
-  where,
-  getDocs,
-} from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '@/lib/firebase';
+import { useCallback, useEffect } from 'react';
+import { useMediaDevices } from './webrtc/useMediaDevices';
+import { usePeerConnection } from './webrtc/usePeerConnection';
+import { useScreenShare } from './webrtc/useScreenShare';
+import { useSignaling } from './webrtc/useSignaling';
 
 interface UseWebRTCProps {
   sessionId: string;
-  isHost: boolean; // true = profissional (criador), false = paciente
+  isHost: boolean;
   onRemoteStream?: (stream: MediaStream) => void;
   onConnectionStateChange?: (state: RTCPeerConnectionState) => void;
 }
-
-const ICE_SERVERS: RTCConfiguration = {
-  iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-    { urls: 'stun:stun4.l.google.com:19302' },
-  ],
-};
 
 export function useWebRTCConnection({
   sessionId,
@@ -37,379 +17,37 @@ export function useWebRTCConnection({
   onRemoteStream,
   onConnectionStateChange,
 }: UseWebRTCProps) {
-  const [localStream, setLocalStream] = useState<MediaStream | null>(null);
-  const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
-  const [screenStream, setScreenStream] = useState<MediaStream | null>(null);
-  const [connectionState, setConnectionState] = useState<RTCPeerConnectionState>('new');
-  const [isMuted, setIsMuted] = useState(false);
-  const [isVideoOff, setIsVideoOff] = useState(false);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const media = useMediaDevices();
+  const peer = usePeerConnection({ onRemoteStream, onConnectionStateChange });
+  const screen = useScreenShare(peer.peerConnectionRef);
+  const signaling = useSignaling({ sessionId, isHost });
 
-  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-  const originalVideoTrackRef = useRef<MediaStreamTrack | null>(null);
-  const unsubscribersRef = useRef<(() => void)[]>([]);
-
-  // Initialize media devices
-  const initializeMedia = useCallback(async () => {
-    try {
-      console.log('🎥 Requesting media access...');
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          facingMode: 'user',
-        },
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-      console.log('✅ Media access granted');
-      setLocalStream(stream);
-      return stream;
-    } catch (err) {
-      console.error('❌ Error accessing media:', err);
-      setError('Erro ao acessar câmera/microfone. Verifique as permissões.');
-      throw err;
-    }
-  }, []);
-
-  // Create peer connection
-  const createPeerConnection = useCallback((stream: MediaStream) => {
-    console.log('🔗 Creating peer connection...');
-    const pc = new RTCPeerConnection(ICE_SERVERS);
-
-    // Add local tracks
-    stream.getTracks().forEach((track) => {
-      console.log('📤 Adding track:', track.kind);
-      pc.addTrack(track, stream);
-    });
-
-    // Handle remote tracks
-    const remote = new MediaStream();
-    pc.ontrack = (event) => {
-      console.log('📥 Received remote track:', event.track.kind);
-      event.streams[0].getTracks().forEach((track) => {
-        remote.addTrack(track);
-      });
-      setRemoteStream(remote);
-      onRemoteStream?.(remote);
-    };
-
-    // Connection state changes
-    pc.onconnectionstatechange = () => {
-      console.log('🔄 Connection state:', pc.connectionState);
-      setConnectionState(pc.connectionState);
-      onConnectionStateChange?.(pc.connectionState);
-    };
-
-    pc.oniceconnectionstatechange = () => {
-      console.log('🧊 ICE connection state:', pc.iceConnectionState);
-    };
-
-    peerConnectionRef.current = pc;
-    return pc;
-  }, [onRemoteStream, onConnectionStateChange]);
-
-  // Host: Create offer and wait for answer
-  const startAsHost = useCallback(async () => {
-    if (!isFirebaseConfigured || !db || !sessionId) {
-      setError('Firebase não configurado');
-      return;
-    }
-
-    try {
-      console.log('👤 Starting as HOST...');
-      const stream = await initializeMedia();
-      const pc = createPeerConnection(stream);
-
-      const callDoc = doc(db, 'calls', sessionId);
-      const offerCandidates = collection(callDoc, 'offerCandidates');
-      const answerCandidates = collection(callDoc, 'answerCandidates');
-
-      // Collect ICE candidates
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          console.log('🧊 Adding offer ICE candidate');
-          addDoc(offerCandidates, event.candidate.toJSON());
-        }
-      };
-
-      // Create offer
-      const offerDescription = await pc.createOffer();
-      await pc.setLocalDescription(offerDescription);
-      console.log('📝 Created offer');
-
-      const offer = {
-        sdp: offerDescription.sdp,
-        type: offerDescription.type,
-      };
-
-      await setDoc(callDoc, { offer, createdAt: new Date().toISOString() });
-      console.log('💾 Saved offer to Firestore');
-
-      // Listen for answer
-      const unsubAnswer = onSnapshot(callDoc, (snapshot) => {
-        const data = snapshot.data();
-        if (!pc.currentRemoteDescription && data?.answer) {
-          console.log('📩 Received answer');
-          const answerDescription = new RTCSessionDescription(data.answer);
-          pc.setRemoteDescription(answerDescription);
-        }
-      });
-      unsubscribersRef.current.push(unsubAnswer);
-
-      // Listen for ICE candidates from guest
-      const unsubCandidates = onSnapshot(answerCandidates, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added') {
-            console.log('🧊 Adding answer ICE candidate');
-            const candidate = new RTCIceCandidate(change.doc.data());
-            pc.addIceCandidate(candidate);
-          }
-        });
-      });
-      unsubscribersRef.current.push(unsubCandidates);
-
-    } catch (err) {
-      console.error('❌ Error starting as host:', err);
-      setError('Erro ao iniciar chamada');
-    }
-  }, [sessionId, initializeMedia, createPeerConnection]);
-
-  // Guest: Answer the call
-  const joinAsGuest = useCallback(async () => {
-    if (!isFirebaseConfigured || !db || !sessionId) {
-      setError('Firebase não configurado');
-      return;
-    }
-
-    try {
-      console.log('👥 Joining as GUEST...');
-      const stream = await initializeMedia();
-      const pc = createPeerConnection(stream);
-
-      const callDoc = doc(db, 'calls', sessionId);
-      const answerCandidates = collection(callDoc, 'answerCandidates');
-      const offerCandidates = collection(callDoc, 'offerCandidates');
-
-      // Collect ICE candidates
-      pc.onicecandidate = (event) => {
-        if (event.candidate) {
-          console.log('🧊 Adding answer ICE candidate');
-          addDoc(answerCandidates, event.candidate.toJSON());
-        }
-      };
-
-      // Get the offer
-      const callData = (await getDoc(callDoc)).data();
-      if (!callData?.offer) {
-        setError('Chamada não encontrada');
-        return;
-      }
-
-      console.log('📩 Got offer, setting remote description');
-      const offerDescription = callData.offer;
-      await pc.setRemoteDescription(new RTCSessionDescription(offerDescription));
-
-      // Create answer
-      const answerDescription = await pc.createAnswer();
-      await pc.setLocalDescription(answerDescription);
-      console.log('📝 Created answer');
-
-      const answer = {
-        type: answerDescription.type,
-        sdp: answerDescription.sdp,
-      };
-
-      await updateDoc(callDoc, { answer });
-      console.log('💾 Saved answer to Firestore');
-
-      // Listen for ICE candidates from host
-      const unsubCandidates = onSnapshot(offerCandidates, (snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          if (change.type === 'added') {
-            console.log('🧊 Adding offer ICE candidate');
-            const candidate = new RTCIceCandidate(change.doc.data());
-            pc.addIceCandidate(candidate);
-          }
-        });
-      });
-      unsubscribersRef.current.push(unsubCandidates);
-
-    } catch (err) {
-      console.error('❌ Error joining as guest:', err);
-      setError('Erro ao entrar na chamada');
-    }
-  }, [sessionId, initializeMedia, createPeerConnection]);
-
-  // Start connection based on role
   const startConnection = useCallback(async () => {
-    if (isHost) {
-      await startAsHost();
-    } else {
-      await joinAsGuest();
-    }
-  }, [isHost, startAsHost, joinAsGuest]);
-
-  // Toggle mute
-  const toggleMute = useCallback(() => {
-    if (localStream) {
-      localStream.getAudioTracks().forEach((track) => {
-        track.enabled = !track.enabled;
-      });
-      setIsMuted((prev) => !prev);
-    }
-  }, [localStream]);
-
-  // Toggle video
-  const toggleVideo = useCallback(() => {
-    if (localStream) {
-      localStream.getVideoTracks().forEach((track) => {
-        track.enabled = !track.enabled;
-      });
-      setIsVideoOff((prev) => !prev);
-    }
-  }, [localStream]);
-
-  // Start screen sharing
-  const startScreenShare = useCallback(async () => {
-    if (!peerConnectionRef.current || !localStream) {
-      console.error('❌ Cannot share screen: no peer connection or local stream');
-      return;
-    }
-
     try {
-      console.log('🖥️ Starting screen share...');
-      const stream = await navigator.mediaDevices.getDisplayMedia({
-        video: true,
-        audio: false,
-      });
+      const stream = await media.initializeMedia();
+      const pc = peer.createPeerConnection(stream);
 
-      const screenTrack = stream.getVideoTracks()[0];
-      setScreenStream(stream);
-
-      // Find the video sender and replace the track
-      const videoSender = peerConnectionRef.current
-        .getSenders()
-        .find((sender) => sender.track?.kind === 'video');
-
-      if (videoSender && videoSender.track) {
-        // Save original video track to restore later
-        originalVideoTrackRef.current = videoSender.track;
-        await videoSender.replaceTrack(screenTrack);
-        console.log('✅ Screen share started');
-        setIsScreenSharing(true);
+      if (isHost) {
+        console.log('👤 Starting as HOST...');
+        await signaling.startAsHost(pc);
+      } else {
+        console.log('👥 Joining as GUEST...');
+        await signaling.joinAsGuest(pc);
       }
-
-      // Handle when user stops sharing via browser UI
-      screenTrack.onended = () => {
-        console.log('🖥️ Screen share ended by user');
-        stopScreenShare();
-      };
-
     } catch (err) {
-      console.error('❌ Error starting screen share:', err);
-      setError('Erro ao compartilhar tela');
+      console.error('❌ Error starting connection:', err);
+      media.setError(isHost ? 'Erro ao iniciar chamada' : 'Erro ao entrar na chamada');
     }
-  }, [localStream]);
+  }, [isHost, media, peer, signaling]);
 
-  // Stop screen sharing
-  const stopScreenShare = useCallback(async () => {
-    if (!peerConnectionRef.current || !originalVideoTrackRef.current) {
-      return;
-    }
-
-    try {
-      console.log('🖥️ Stopping screen share...');
-      
-      // Stop screen stream tracks
-      if (screenStream) {
-        screenStream.getTracks().forEach((track) => track.stop());
-        setScreenStream(null);
-      }
-
-      // Restore original video track
-      const videoSender = peerConnectionRef.current
-        .getSenders()
-        .find((sender) => sender.track?.kind === 'video');
-
-      if (videoSender && originalVideoTrackRef.current) {
-        await videoSender.replaceTrack(originalVideoTrackRef.current);
-        originalVideoTrackRef.current = null;
-        console.log('✅ Original video restored');
-      }
-
-      setIsScreenSharing(false);
-
-    } catch (err) {
-      console.error('❌ Error stopping screen share:', err);
-    }
-  }, [screenStream]);
-
-  // Toggle screen share
-  const toggleScreenShare = useCallback(async () => {
-    if (isScreenSharing) {
-      await stopScreenShare();
-    } else {
-      await startScreenShare();
-    }
-  }, [isScreenSharing, startScreenShare, stopScreenShare]);
-
-  // Cleanup
   const cleanup = useCallback(async () => {
     console.log('🧹 Cleaning up...');
-    
-    // Stop screen share first
-    if (screenStream) {
-      screenStream.getTracks().forEach((track) => track.stop());
-    }
-    
-    // Stop local tracks
-    if (localStream) {
-      localStream.getTracks().forEach((track) => track.stop());
-    }
+    screen.cleanupScreenShare();
+    media.stopAllTracks();
+    peer.closePeerConnection();
+    await signaling.cleanupSignaling();
+  }, [screen, media, peer, signaling]);
 
-    // Close peer connection
-    if (peerConnectionRef.current) {
-      peerConnectionRef.current.close();
-      peerConnectionRef.current = null;
-    }
-
-    // Unsubscribe from Firestore listeners
-    unsubscribersRef.current.forEach((unsub) => unsub());
-    unsubscribersRef.current = [];
-
-    // Clean up Firestore documents (only host should do this)
-    if (isHost && isFirebaseConfigured && db && sessionId) {
-      try {
-        const callDoc = doc(db, 'calls', sessionId);
-        
-        // Delete subcollections
-        const offerCandidates = await getDocs(collection(callDoc, 'offerCandidates'));
-        offerCandidates.forEach(async (doc) => await deleteDoc(doc.ref));
-        
-        const answerCandidates = await getDocs(collection(callDoc, 'answerCandidates'));
-        answerCandidates.forEach(async (doc) => await deleteDoc(doc.ref));
-        
-        await deleteDoc(callDoc);
-        console.log('🗑️ Cleaned up Firestore documents');
-      } catch (err) {
-        console.error('Error cleaning up Firestore:', err);
-      }
-    }
-
-    setLocalStream(null);
-    setRemoteStream(null);
-    setScreenStream(null);
-    setConnectionState('new');
-    setIsScreenSharing(false);
-    originalVideoTrackRef.current = null;
-  }, [localStream, screenStream, isHost, sessionId]);
-
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       cleanup();
@@ -417,19 +55,19 @@ export function useWebRTCConnection({
   }, []);
 
   return {
-    localStream,
-    remoteStream,
-    screenStream,
-    connectionState,
-    isMuted,
-    isVideoOff,
-    isScreenSharing,
-    error,
+    localStream: media.localStream,
+    remoteStream: peer.remoteStream,
+    screenStream: screen.screenStream,
+    connectionState: peer.connectionState,
+    isMuted: media.isMuted,
+    isVideoOff: media.isVideoOff,
+    isScreenSharing: screen.isScreenSharing,
+    error: media.error,
     startConnection,
-    toggleMute,
-    toggleVideo,
-    toggleScreenShare,
+    toggleMute: media.toggleMute,
+    toggleVideo: media.toggleVideo,
+    toggleScreenShare: screen.toggleScreenShare,
     cleanup,
-    isConnected: connectionState === 'connected',
+    isConnected: peer.isConnected,
   };
 }
